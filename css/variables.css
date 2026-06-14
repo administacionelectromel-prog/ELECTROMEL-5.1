@@ -1,0 +1,54 @@
+/* ════════════════════════════════════════════════════════════════
+   ELECTROMEL — TEMA OSCURO INDUSTRIAL
+   ════════════════════════════════════════════════════════════════ */
+:root {
+  /* Paleta principal */
+  --bg:        #0f0f0f;
+  --surface:   #1a1a1a;
+  --surface-2: #232323;
+  --surface-3: #2a2a2a;
+  --acento:    #e8a020;
+  --acento-2:  #c8851a;
+  --exito:     #4caf7d;
+  --peligro:   #e05050;
+  --warn:      #e8a020;
+  --info:      #5090d0;
+  --texto:     #f0f0f0;
+  --texto-2:   #888888;
+  --texto-3:   #555555;
+  --borde:     #2a2a2a;
+  --borde-2:   #3a3a3a;
+
+  /* Encabezado en gris (no negro, según pedido) */
+  --header-bg: #2d2d2d;
+  --header-bg-2: #1f1f1f;
+
+  /* Semáforo */
+  --sem-verde:    #4caf7d;
+  --sem-amarillo: #e8a020;
+  --sem-rojo:     #e05050;
+  --sem-gris:     #555555;
+
+  /* Espacios y formas */
+  --r-sm: 6px;
+  --r:    10px;
+  --r-md: 12px;
+  --r-xl: 20px;
+
+  /* Sombras */
+  --sh-3: 0 8px 24px rgba(0,0,0,0.6);
+
+  /* Z-index */
+  --z-nav:   100;
+  --z-fab:   200;
+  --z-modal: 1000;
+  --z-toast: 2000;
+
+  /* Alturas fijas */
+  --h-header:  56px;
+  --h-nav:     64px;
+
+  /* Tipografía */
+  --ff: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --ff-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+}

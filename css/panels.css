@@ -1,0 +1,650 @@
+/** ELECTROMEL — panels.css | Panel principal, admin, detalle universal, alertas WA */
+
+/* ════════════════════════════════════════════════════════════════
+   PANEL PRINCIPAL — Paso 11
+   ════════════════════════════════════════════════════════════════ */
+
+/* Barra superior con buscador y filtros */
+.panel-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: var(--bg);
+  padding-bottom: 8px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid var(--borde);
+}
+
+.panel-search {
+  margin-bottom: 8px;
+}
+.panel-search input {
+  width: 100%;
+  background: var(--surface-2);
+  border: 1px solid var(--borde-2);
+  border-radius: var(--r-md);
+  padding: 11px 14px;
+  font-size: 14px;
+  color: var(--texto);
+}
+.panel-search input::placeholder {
+  color: var(--texto-3);
+}
+
+/* Filtros tipo chip horizontal scroll */
+.panel-filtros {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  -webkit-overflow-scrolling: touch;
+}
+.panel-filtros::-webkit-scrollbar { display: none; }
+.panel-filtro {
+  flex-shrink: 0;
+  background: var(--surface-2);
+  border: 1px solid var(--borde-2);
+  color: var(--texto-2);
+  border-radius: 20px;
+  padding: 7px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+.panel-filtro.active {
+  background: var(--acento);
+  color: #1a1a1a;
+  border-color: var(--acento);
+}
+
+/* Stats chips */
+.panel-stats {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+.stat-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--surface-2);
+  border: 1px solid var(--borde-2);
+  border-radius: 14px;
+  padding: 5px 11px;
+  font-size: 12px;
+  color: var(--texto-2);
+}
+.stat-chip .stat-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--texto-3);
+}
+.stat-rojo .stat-dot     { background: var(--peligro); }
+.stat-amarillo .stat-dot { background: #e8a020; }
+.stat-verde .stat-dot    { background: var(--exito); }
+.stat-chip span:not(.stat-dot) {
+  color: var(--texto);
+  font-weight: 700;
+}
+
+/* Tarjeta de registro */
+.reg-card {
+  background: var(--surface-2);
+  border: 1px solid var(--borde-2);
+  border-radius: var(--r-md);
+  padding: 12px 14px;
+  margin-bottom: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  position: relative;
+  cursor: pointer;
+  transition: transform 0.1s, border-color 0.15s;
+}
+.reg-card:active {
+  transform: scale(0.985);
+}
+.reg-card.semaforo-rojo     { border-left: 4px solid var(--peligro); }
+.reg-card.semaforo-amarillo { border-left: 4px solid #e8a020; }
+.reg-card.semaforo-verde    { border-left: 4px solid var(--exito); }
+.reg-card.semaforo-gris     { border-left: 4px solid var(--texto-3); opacity: 0.7; }
+
+.reg-card-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+.reg-card-tipo {
+  font-weight: 700;
+  letter-spacing: 0.3px;
+}
+.reg-card-numero {
+  font-family: var(--ff-mono);
+  font-weight: 700;
+  color: var(--acento);
+}
+.reg-card-estado {
+  margin-left: auto;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 3px 8px;
+  border-radius: 10px;
+  background: var(--surface-3);
+  color: var(--texto-2);
+}
+.reg-card-estado.estado-rojo     { background: rgba(224,80,80,0.15); color: var(--peligro); }
+.reg-card-estado.estado-amarillo { background: rgba(232,160,32,0.15); color: #e8a020; }
+.reg-card-estado.estado-verde    { background: rgba(76,175,125,0.15); color: var(--exito); }
+
+.reg-card-cliente {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--texto);
+}
+
+.reg-card-equipo {
+  font-size: 12px;
+  color: var(--texto-2);
+}
+
+.reg-card-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 2px;
+}
+.reg-card-edad {
+  font-size: 11px;
+  color: var(--texto-3);
+}
+.reg-card-total {
+  font-family: var(--ff-mono);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--acento);
+}
+
+/* Botón "Crear OTT" dentro de la tarjeta ING */
+.reg-card-action {
+  margin-top: 6px;
+}
+.reg-card-action .btn {
+  width: 100%;
+  font-size: 12px;
+  padding: 7px 10px;
+}
+
+/* Sección Archivados (colapsible custom) */
+.archivados-wrapper {
+  margin-top: 20px;
+  border-top: 1px dashed var(--borde-2);
+  padding-top: 12px;
+}
+.archivados-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  background: var(--surface-2);
+  border: 1px solid var(--borde-2);
+  border-radius: var(--r-sm);
+  padding: 10px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--texto-2);
+  cursor: pointer;
+}
+.archivados-icon {
+  font-size: 10px;
+  color: var(--texto-3);
+  transition: transform 0.2s;
+}
+.archivados-wrapper.expanded .archivados-icon {
+  transform: rotate(90deg);
+}
+.archivados-title {
+  flex: 1;
+  text-align: left;
+}
+.archivados-count {
+  font-size: 11px;
+  background: var(--surface-3);
+  color: var(--texto-2);
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+.archivados-body {
+  padding: 12px 0;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   ADMINISTRACIÓN — Paso 14
+   ════════════════════════════════════════════════════════════════ */
+
+.admin-section {
+  margin-bottom: 12px;
+}
+
+/* Tabs SEMANA/MES/AÑO */
+.admin-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 12px;
+  background: var(--surface-3);
+  padding: 4px;
+  border-radius: var(--r-md);
+}
+.admin-tab {
+  flex: 1;
+  padding: 8px 12px;
+  background: transparent;
+  border: none;
+  color: var(--texto-2);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  border-radius: var(--r-sm);
+}
+.admin-tab.active {
+  background: var(--acento);
+  color: #1a1a1a;
+}
+
+/* Grid de KPIs */
+.admin-kpi-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.admin-kpi {
+  background: var(--surface-3);
+  border-radius: var(--r-sm);
+  padding: 12px;
+  text-align: center;
+}
+.admin-kpi-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--texto-3);
+  margin-bottom: 4px;
+}
+.admin-kpi-valor {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--texto);
+  font-family: var(--ff-mono);
+}
+.admin-kpi-valor.acento { color: var(--acento); }
+.admin-kpi-valor.exito  { color: var(--exito); }
+.admin-kpi-valor.peligro{ color: var(--peligro); }
+.admin-kpi-delta {
+  font-size: 11px;
+  margin-top: 4px;
+  color: var(--texto-3);
+}
+.admin-kpi-delta.up   { color: var(--exito); }
+.admin-kpi-delta.down { color: var(--peligro); }
+
+/* Semáforo del dashboard */
+.dash-semaforo {
+  padding: 14px;
+  border-radius: var(--r-md);
+  margin-bottom: 12px;
+  text-align: center;
+}
+.dash-semaforo.estado-excelente {
+  background: rgba(76,175,125,0.15);
+  border: 1px solid rgba(76,175,125,0.4);
+}
+.dash-semaforo.estado-ajustar {
+  background: rgba(232,160,32,0.15);
+  border: 1px solid rgba(232,160,32,0.4);
+}
+.dash-semaforo.estado-perdida {
+  background: rgba(224,80,80,0.15);
+  border: 1px solid rgba(224,80,80,0.4);
+}
+.dash-semaforo-icon {
+  font-size: 28px;
+  margin-bottom: 6px;
+}
+.dash-semaforo-titulo {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--texto);
+  margin-bottom: 2px;
+}
+.dash-semaforo-frase {
+  font-size: 12px;
+  color: var(--texto-2);
+}
+
+/* Barras de top categorías */
+.top-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  font-size: 12px;
+}
+.top-row-label {
+  flex: 0 0 110px;
+  color: var(--texto-2);
+  font-size: 11px;
+}
+.top-row-bar {
+  flex: 1;
+  height: 12px;
+  background: var(--surface-3);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.top-row-bar-fill {
+  height: 100%;
+  background: var(--acento);
+  transition: width 0.3s;
+}
+.top-row-valor {
+  flex: 0 0 80px;
+  text-align: right;
+  font-family: var(--ff-mono);
+  font-weight: 700;
+  color: var(--acento);
+  font-size: 11px;
+}
+
+/* Lista de movimientos financieros */
+.movs-filtros {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 10px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.movs-filtros::-webkit-scrollbar { display: none; }
+.movs-filtro {
+  flex-shrink: 0;
+  background: var(--surface-3);
+  border: 1px solid var(--borde-2);
+  color: var(--texto-2);
+  border-radius: 14px;
+  padding: 5px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.movs-filtro.active {
+  background: var(--acento);
+  color: #1a1a1a;
+  border-color: var(--acento);
+}
+
+.mov-row {
+  display: grid;
+  grid-template-columns: 24px 1fr auto;
+  gap: 10px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--borde);
+  font-size: 12px;
+  align-items: center;
+}
+.mov-row:last-child { border-bottom: none; }
+.mov-icon {
+  font-size: 16px;
+  text-align: center;
+}
+.mov-data { line-height: 1.3; }
+.mov-concepto {
+  color: var(--texto);
+  font-weight: 600;
+}
+.mov-meta {
+  color: var(--texto-3);
+  font-size: 10px;
+}
+.mov-monto {
+  font-family: var(--ff-mono);
+  font-weight: 700;
+  font-size: 13px;
+  white-space: nowrap;
+}
+.mov-monto.income { color: var(--exito); }
+.mov-monto.expense, .mov-monto.viatic { color: var(--peligro); }
+.mov-monto.partial_payment { color: var(--acento); }
+
+/* Stock items */
+.stock-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto auto;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--borde);
+  font-size: 13px;
+  align-items: center;
+}
+.stock-row:last-child { border-bottom: none; }
+.stock-nombre {
+  font-weight: 600;
+  color: var(--texto);
+}
+.stock-cant {
+  background: var(--surface-3);
+  color: var(--acento);
+  padding: 3px 9px;
+  border-radius: 10px;
+  font-family: var(--ff-mono);
+  font-size: 11px;
+  font-weight: 700;
+}
+.stock-cant.low { color: var(--peligro); }
+.stock-costo {
+  font-family: var(--ff-mono);
+  color: var(--texto-2);
+  font-size: 11px;
+}
+
+/* Clientes en admin */
+.cli-admin-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  padding: 10px;
+  border-bottom: 1px solid var(--borde);
+  font-size: 12px;
+  cursor: pointer;
+}
+.cli-admin-row:active { background: var(--surface-3); }
+.cli-admin-nombre {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--texto);
+}
+.cli-admin-meta {
+  color: var(--texto-3);
+  font-size: 11px;
+  margin-top: 2px;
+}
+.cli-admin-badge {
+  background: var(--surface-3);
+  color: var(--texto-2);
+  padding: 3px 9px;
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: 700;
+  align-self: center;
+}
+.cli-admin-badge.recurrente {
+  background: rgba(76,175,125,0.2);
+  color: var(--exito);
+}
+
+/* Audit log */
+.audit-row {
+  padding: 8px 0;
+  border-bottom: 1px solid var(--borde);
+  font-size: 11px;
+  display: grid;
+  grid-template-columns: 22px 1fr auto;
+  gap: 10px;
+  align-items: start;
+}
+.audit-row:last-child { border-bottom: none; }
+.audit-icon {
+  font-size: 14px;
+  text-align: center;
+}
+.audit-msg {
+  color: var(--texto);
+  word-break: break-word;
+}
+.audit-time {
+  color: var(--texto-3);
+  font-family: var(--ff-mono);
+  font-size: 10px;
+  white-space: nowrap;
+}
+
+/* Banner Modo Jefe */
+.jefe-bigstats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.jefe-bigstat {
+  background: linear-gradient(135deg, var(--surface-2) 0%, var(--surface-3) 100%);
+  border: 1px solid var(--borde-2);
+  border-radius: var(--r-md);
+  padding: 12px;
+}
+.jefe-bigstat-label {
+  font-size: 10px;
+  letter-spacing: 0.5px;
+  color: var(--texto-3);
+  margin-bottom: 4px;
+}
+.jefe-bigstat-valor {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--acento);
+  font-family: var(--ff-mono);
+}
+
+/* Recomendación accionable */
+.recomendacion {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 10px;
+  background: var(--surface-3);
+  border-left: 3px solid var(--acento);
+  border-radius: var(--r-sm);
+  margin-bottom: 8px;
+}
+.recomendacion-icon { font-size: 18px; }
+.recomendacion-texto { flex: 1; font-size: 12px; color: var(--texto); }
+/* ── Modal de detalle (Paso 11 bloque C) ─────────────────────── */
+.detalle-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--borde);
+  font-size: 13px;
+}
+.detalle-row:last-child { border-bottom: none; }
+.detalle-label {
+  color: var(--texto-2);
+  flex-shrink: 0;
+}
+.detalle-value {
+  color: var(--texto);
+  font-weight: 600;
+  text-align: right;
+  word-break: break-word;
+}
+.detalle-lista {
+  list-style: none;
+  padding: 0;
+  margin: 4px 0 0;
+}
+.detalle-lista li {
+  position: relative;
+  padding: 4px 0 4px 16px;
+  font-size: 13px;
+  color: var(--texto);
+}
+.detalle-lista li::before {
+  content: "●";
+  color: var(--acento);
+  position: absolute;
+  left: 0;
+  top: 4px;
+  font-size: 10px;
+}
+
+/* Tabla compacta del modal de detalle */
+.detalle-tabla {
+  margin-top: 6px;
+}
+.detalle-tabla-head,
+.detalle-tabla-row {
+  display: grid;
+  grid-template-columns: 40px 1fr 80px 80px;
+  gap: 6px;
+  padding: 6px 0;
+  font-size: 12px;
+}
+.detalle-tabla-head {
+  font-weight: 700;
+  color: var(--texto-2);
+  border-bottom: 1px solid var(--borde-2);
+  padding-bottom: 8px;
+}
+.detalle-tabla-row {
+  border-bottom: 1px solid var(--borde);
+}
+.detalle-tabla-row:last-child { border-bottom: none; }
+.detalle-tabla-head .r,
+.detalle-tabla-row .r {
+  text-align: right;
+  font-family: var(--ff-mono);
+}
+
+/* Filas de pago */
+.pago-row {
+  display: grid;
+  grid-template-columns: 30px 1fr auto auto;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--borde);
+  font-size: 12px;
+  align-items: center;
+}
+.pago-row:last-child { border-bottom: none; }
+.pago-num {
+  color: var(--texto-3);
+  font-family: var(--ff-mono);
+  font-size: 11px;
+}
+.pago-monto {
+  color: var(--acento);
+  font-size: 14px;
+}
+.pago-metodo {
+  color: var(--texto-2);
+  text-transform: uppercase;
+  font-size: 11px;
+}
+.pago-fecha {
+  color: var(--texto-3);
+  font-size: 11px;
+}
