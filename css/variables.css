@@ -1,0 +1,62 @@
+/* ════════════════════════════════════════════════════════════════
+   ELECTROMEL — TEMA OSCURO AZULADO (moderno)
+   Fondos azul oscuro elegante, acento ámbar que resalta.
+   ════════════════════════════════════════════════════════════════ */
+:root {
+  /* Paleta principal — fondos con tinte azul frío */
+  --bg:        #0a0c10;
+  --surface:   #141822;
+  --surface-2: #1a1f2b;
+  --surface-3: #222836;
+  --acento:    #f0b040;
+  --acento-2:  #e09818;
+  --exito:     #4caf7d;
+  --peligro:   #e05868;
+  --warn:      #f0b040;
+  --info:      #5090d0;
+  --texto:     #f0f2f5;
+  --texto-2:   #8090a8;
+  --texto-3:   #586176;
+  --borde:     #232a38;
+  --borde-2:   #2e3647;
+
+  /* Encabezado — degradado azul oscuro */
+  --header-bg: #1c2230;
+  --header-bg-2: #141821;
+
+  /* Semáforo */
+  --sem-verde:    #4caf7d;
+  --sem-amarillo: #f0b040;
+  --sem-rojo:     #e05868;
+  --sem-gris:     #586176;
+
+  /* Espacios y formas — más redondeado y moderno */
+  --r-sm: 8px;
+  --r:    12px;
+  --r-md: 14px;
+  --r-xl: 20px;
+
+  /* Sombras — suaves con un toque de profundidad */
+  --sh-1: 0 2px 8px rgba(0,0,0,0.25);
+  --sh-2: 0 3px 14px rgba(0,0,0,0.32);
+  --sh-3: 0 8px 28px rgba(0,0,0,0.5);
+
+  /* Degradados reutilizables */
+  --grad-header: linear-gradient(135deg, #1c2230, #141821);
+  --grad-acento: linear-gradient(135deg, #f0b040, #e09818);
+  --grad-card:   linear-gradient(135deg, #141822, #10131b);
+
+  /* Z-index */
+  --z-nav:   100;
+  --z-fab:   200;
+  --z-modal: 1000;
+  --z-toast: 2000;
+
+  /* Alturas fijas */
+  --h-header:  56px;
+  --h-nav:     64px;
+
+  /* Tipografía */
+  --ff: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --ff-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+}

@@ -1,0 +1,602 @@
+/** ELECTROMEL — components.css | Cards, buttons, fields, forms, tabs, items */
+
+/* ════════════════════════════════════════════════════════════════
+   COMPONENTES BASE
+   ════════════════════════════════════════════════════════════════ */
+
+/* ── Tarjetas ────────────────────────────────────────────────── */
+.card {
+  background: var(--grad-card, var(--surface));
+  border: 1px solid var(--borde);
+  border-radius: var(--r-md);
+  padding: 15px;
+  margin-bottom: 12px;
+  box-shadow: var(--sh-1);
+  transition: transform 0.15s;
+}
+
+.card:active { transform: scale(0.995); }
+
+.card-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--texto);
+  letter-spacing: 0.4px;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+}
+
+.card-sub {
+  font-size: 11px;
+  color: var(--texto-2);
+  margin-top: -6px;
+  margin-bottom: 10px;
+}
+
+/* ── Botones ─────────────────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 11px 16px;
+  border-radius: var(--r-sm);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  background: var(--surface-2);
+  color: var(--texto);
+  border: 1px solid var(--borde-2);
+  transition: transform 0.1s, opacity 0.15s;
+  min-height: 42px;
+}
+
+.btn:active { transform: scale(0.97); }
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--acento) 0%, var(--acento-2) 100%);
+  color: #1a1408;
+  border-color: var(--acento);
+  box-shadow: 0 4px 16px rgba(240, 176, 64, 0.25);
+}
+
+.btn-success {
+  background: var(--exito);
+  color: #0a1a10;
+  border-color: var(--exito);
+}
+
+.btn-danger {
+  background: var(--peligro);
+  color: #1a0808;
+  border-color: var(--peligro);
+}
+
+.btn-ghost {
+  background: transparent;
+  border-color: var(--borde-2);
+  color: var(--texto-2);
+}
+
+.btn-block { width: 100%; }
+.btn-sm { padding: 7px 10px; font-size: 12px; min-height: 32px; }
+.btn-lg { padding: 14px 20px; font-size: 15px; min-height: 50px; }
+
+/* ── Form rows ───────────────────────────────────────────────── */
+.field {
+  margin-bottom: 12px;
+  position: relative;
+}
+
+.field-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--texto-2);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  margin-bottom: 5px;
+}
+
+.field-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.field-row-3 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+}
+
+/* ── Toggle switch ───────────────────────────────────────────── */
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.toggle-track {
+  width: 42px;
+  height: 24px;
+  background: var(--surface-3);
+  border: 1px solid var(--borde-2);
+  border-radius: 12px;
+  position: relative;
+  transition: background 0.2s;
+}
+
+.toggle-track::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 18px;
+  height: 18px;
+  background: var(--texto-2);
+  border-radius: 50%;
+  transition: all 0.2s;
+}
+
+.toggle input { display: none; }
+
+.toggle input:checked + .toggle-track {
+  background: var(--acento);
+  border-color: var(--acento);
+}
+
+.toggle input:checked + .toggle-track::after {
+  left: 22px;
+  background: #1a1a1a;
+}
+
+/* ── Tabs internas (no las del nav) ─────────────────────────── */
+.tabs-inner {
+  display: flex;
+  background: var(--surface-2);
+  border-radius: var(--r-sm);
+  padding: 3px;
+  gap: 2px;
+  margin-bottom: 14px;
+}
+
+.tab-inner {
+  flex: 1;
+  padding: 9px 8px;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--texto-2);
+  border-radius: 4px;
+  transition: all 0.15s;
+}
+
+.tab-inner.active {
+  background: var(--acento);
+  color: #1a1a1a;
+}
+
+/* ── Search bar ──────────────────────────────────────────────── */
+.search-bar {
+  position: relative;
+  margin-bottom: 12px;
+}
+
+.search-bar input {
+  padding-left: 36px;
+}
+
+.search-bar::before {
+  content: "🔍";
+  position: absolute;
+  left: 11px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 14px;
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+/* ── Filtros chips ───────────────────────────────────────────── */
+.chips {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  margin-bottom: 12px;
+  scrollbar-width: none;
+}
+
+.chips::-webkit-scrollbar { display: none; }
+
+.chip {
+  flex-shrink: 0;
+  padding: 7px 14px;
+  background: var(--surface-2);
+  border: 1px solid var(--borde-2);
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--texto-2);
+  white-space: nowrap;
+  transition: all 0.15s;
+}
+
+.chip.active {
+  background: var(--acento);
+  border-color: var(--acento);
+  color: #1a1a1a;
+}
+
+/* ── Item con bullet (●) ─────────────────────────────────────── */
+.item-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.item-bullet {
+  color: var(--acento);
+  font-size: 18px;
+  line-height: 1.4;
+  flex-shrink: 0;
+  padding-top: 8px;
+}
+
+.item-row textarea {
+  flex: 1;
+  min-height: 44px;
+}
+
+.item-remove {
+  width: 32px;
+  height: 32px;
+  margin-top: 4px;
+  background: var(--surface-3);
+  border: 1px solid var(--borde-2);
+  border-radius: var(--r-sm);
+  color: var(--peligro);
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* ── Filas tabulares (cant/detalle/precio/subtotal) ─────────── */
+/* Usadas en OTE y PRE para trabajo y materiales. En móvil hago el detalle
+   más ancho y los inputs numéricos más compactos para que entren bien. */
+/* ── Filas tabulares (cant/detalle/precio/subtotal) ───────────
+   Layout en 2 filas: arriba el detalle a todo el ancho (legible),
+   abajo las cifras compactas (cant / P. unit / subtotal / ×).
+   Esto da espacio real para escribir nombres largos como
+   "Tomacorriente exterior IP65" sin que se corte. */
+.tabular-row {
+  display: grid;
+  grid-template-columns: 80px 1fr auto 36px;
+  grid-template-areas:
+    "det  det    det  rm"
+    "cant precio sub  rm";
+  gap: 6px 8px;
+  align-items: center;
+  margin-bottom: 10px;
+  padding: 8px;
+  background: var(--surface-2);
+  border: 1px solid var(--borde);
+  border-radius: var(--r-sm);
+}
+.tabular-row .tabular-detalle { grid-area: det; }
+.tabular-row .tabular-cant    { grid-area: cant; }
+.tabular-row .tabular-precio  { grid-area: precio; }
+.tabular-row .tabular-subtotal{ grid-area: sub; align-self: center; }
+.tabular-row .tabular-remove  { grid-area: rm; align-self: center; }
+
+.tabular-row input {
+  height: 38px;
+  font-size: 14px;
+  padding: 4px 10px;
+  width: 100%;
+}
+.tabular-detalle {
+  font-size: 14px;
+}
+.tabular-cant,
+.tabular-precio {
+  text-align: right;
+}
+.tabular-subtotal {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--acento);
+  text-align: right;
+  padding-right: 6px;
+  white-space: nowrap;
+}
+.tabular-remove {
+  width: 36px;
+  height: 36px;
+  background: var(--surface-3);
+  border: 1px solid var(--borde-2);
+  border-radius: var(--r-sm);
+  color: var(--peligro);
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+/* En pantallas más anchas (tablet/desktop) volvemos a fila única */
+@media (min-width: 600px) {
+  .tabular-row {
+    grid-template-columns: 90px 1fr 110px 100px 36px;
+    grid-template-areas: "cant det precio sub rm";
+    padding: 6px;
+    margin-bottom: 6px;
+  }
+}
+
+/* ── Filas de materiales cliente (cant/detalle/nota) ──────────
+   Mismo principio: en mobile va en 2 filas para que detalle y nota
+   sean legibles; en desktop colapsa a fila única. */
+.matcli-row {
+  display: grid;
+  grid-template-columns: 80px 1fr 36px;
+  grid-template-areas:
+    "det  det  rm"
+    "nota nota rm"
+    "cant .    .";
+  gap: 6px 8px;
+  align-items: center;
+  margin-bottom: 10px;
+  padding: 8px;
+  background: var(--surface-2);
+  border: 1px solid var(--borde);
+  border-radius: var(--r-sm);
+}
+.matcli-row .matcli-detalle { grid-area: det; }
+.matcli-row .matcli-nota    { grid-area: nota; }
+.matcli-row .matcli-cant    { grid-area: cant; }
+.matcli-row .tabular-remove { grid-area: rm; align-self: center; }
+.matcli-row input {
+  height: 38px;
+  font-size: 14px;
+  padding: 4px 10px;
+  width: 100%;
+}
+.matcli-cant {
+  text-align: right;
+}
+@media (min-width: 600px) {
+  .matcli-row {
+    grid-template-columns: 80px 1fr 1fr 36px;
+    grid-template-areas: "cant det nota rm";
+    padding: 6px;
+    margin-bottom: 6px;
+  }
+}
+
+/* ── Dropdown de autocompletado de clientes ──────────────────── */
+/* El input del cliente está dentro de .field. El dropdown se ubica
+   debajo del input con position absolute relativo al .field. */
+.autocomplete-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background: var(--surface-2);
+  border: 1px solid var(--borde-2);
+  border-top: none;
+  border-radius: 0 0 var(--r-sm) var(--r-sm);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+  max-height: 280px;
+  overflow-y: auto;
+}
+.autocomplete-item {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--borde);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.autocomplete-item:last-child { border-bottom: none; }
+.autocomplete-item:hover,
+.autocomplete-item:active {
+  background: var(--surface-3);
+}
+.autocomplete-nombre {
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--texto);
+  margin-bottom: 2px;
+}
+.autocomplete-meta {
+  font-size: 11px;
+  color: var(--texto-2);
+  line-height: 1.3;
+}
+.autocomplete-trabajos {
+  font-size: 11px;
+  color: var(--acento);
+  margin-top: 3px;
+  font-weight: 500;
+}
+.autocomplete-trabajos.recurrente {
+  color: var(--exito);
+  font-weight: 700;
+}
+
+/* ── Estado / semáforo ───────────────────────────────────────── */
+.dot {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.dot-verde    { background: var(--sem-verde); }
+.dot-amarillo { background: var(--sem-amarillo); }
+.dot-rojo     { background: var(--sem-rojo); }
+.dot-gris     { background: var(--sem-gris); }
+
+/* ── Badge ───────────────────────────────────────────────────── */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  border-radius: 4px;
+  background: var(--surface-3);
+  color: var(--texto-2);
+}
+
+/* ── Empty state ─────────────────────────────────────────────── */
+.empty {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--texto-2);
+}
+
+.empty-icon {
+  font-size: 48px;
+  opacity: 0.3;
+  margin-bottom: 10px;
+}
+
+.empty-text {
+  font-size: 13px;
+}
+/* ══════════════════════════════════════════════════════════
+   PLANTILLAS INLINE — dropdown autocomplete + botón
+   ══════════════════════════════════════════════════════════ */
+
+/* Wrapper del textarea con acciones */
+.item-ta-wrap {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Barra de acciones debajo del textarea */
+.item-actions {
+  display: flex;
+  gap: 4px;
+  padding: 2px 0;
+}
+
+/* Botón 📋 junto al textarea */
+.item-plantillas-btn {
+  background: none;
+  border: 1px solid var(--borde-2);
+  border-radius: var(--r-sm);
+  padding: 2px 8px;
+  font-size: 14px;
+  cursor: pointer;
+  color: var(--texto-2);
+  line-height: 1.4;
+  transition: background 0.15s, border-color 0.15s;
+}
+.item-plantillas-btn:active {
+  background: var(--surface-3);
+  border-color: var(--acento);
+}
+
+/* Dropdown inline de sugerencias */
+.plantillas-inline-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 300;
+  background: var(--surface-1);
+  border: 1px solid var(--borde-2);
+  border-top: 2px solid var(--acento);
+  border-radius: 0 0 var(--r-sm) var(--r-sm);
+  max-height: 220px;
+  overflow-y: auto;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+}
+.plantillas-inline-dropdown.hide { display: none; }
+
+.pli-item {
+  padding: 10px 12px;
+  font-size: 13px;
+  color: var(--texto);
+  border-bottom: 1px solid var(--borde);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  line-height: 1.4;
+  transition: background 0.1s;
+}
+.pli-item:last-child { border-bottom: none; }
+.pli-item:active,
+.pli-item.pli-active {
+  background: var(--surface-3);
+  color: var(--acento);
+}
+.pli-item mark {
+  background: transparent;
+  color: var(--acento);
+  font-weight: bold;
+}
+.pli-usos {
+  font-size: 11px;
+  color: var(--texto-3);
+  flex-shrink: 0;
+}
+
+/* ── Modal bottom-sheet mini-panel plantillas ────────────── */
+.modal.modal-bottom {
+  align-items: flex-end;
+  padding: 0;
+}
+.modal.modal-bottom .modal-header,
+.modal.modal-bottom .modal-body {
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+}
+.modal.modal-bottom .modal-body {
+  max-height: 60vh;
+  overflow-y: auto;
+  padding-bottom: env(safe-area-inset-bottom, 16px);
+}
+
+/* ── Secciones colapsables en formularios ("Más opciones") ─── */
+.form-mas-opciones {
+  margin: 8px 0;
+  border: 1px dashed var(--borde);
+  border-radius: 8px;
+  padding: 0;
+}
+.form-mas-opciones > summary {
+  cursor: pointer;
+  padding: 10px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--acento);
+  list-style: none;
+  user-select: none;
+}
+.form-mas-opciones > summary::-webkit-details-marker { display: none; }
+.form-mas-opciones[open] > summary {
+  border-bottom: 1px dashed var(--borde);
+  margin-bottom: 8px;
+}
+.form-mas-opciones > .field,
+.form-mas-opciones > .field-row { padding: 0 12px 8px; }
+
+/* <details> de gastos del viaje: ocultar el marcador nativo (usamos ▸ propio) */
+summary { list-style: none; }
+summary::-webkit-details-marker { display: none; }
+details > summary::marker { content: ''; }

@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ELECTROMEL — Muestra visual refinada</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: system-ui, -apple-system, Arial, sans-serif; background: #0a0a0a; color: #f0f0f0; padding-bottom: 40px; }
+
+  .demo-top { background: #e8a020; color: #000; text-align: center; padding: 10px; font-size: 13px; font-weight: 600; position: sticky; top: 0; z-index: 100; }
+  .selector { display: flex; gap: 8px; padding: 14px; background: #141414; position: sticky; top: 38px; z-index: 99; overflow-x: auto; }
+  .sel-btn { flex-shrink: 0; padding: 10px 16px; border-radius: 10px; border: 1px solid #2a2a2a; background: #1a1a1a; color: #888; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+  .sel-btn.active { background: #e8a020; color: #000; border-color: #e8a020; }
+
+  .variante { display: none; padding: 16px; }
+  .variante.active { display: block; }
+  .v-titulo { font-size: 15px; color: #aaa; margin-bottom: 4px; font-weight: 600; }
+  .v-desc { font-size: 13px; color: #777; margin-bottom: 18px; line-height: 1.5; }
+
+  /* ───────── OPCIÓN 1: ÁMBAR CÁLIDO (brillo suave) ───────── */
+  .op1 { --bg:#0e0d0b; }
+  .op1 .app-header { background:linear-gradient(135deg,#2a2622,#1c1a17); padding:18px 16px; border-radius:18px; display:flex; align-items:center; gap:14px; margin-bottom:18px; box-shadow:0 4px 24px rgba(232,160,32,0.08); border:1px solid rgba(232,160,32,0.08); }
+  .op1 .logo { width:50px; height:50px; background:linear-gradient(135deg,#3a2f1a,#1a1408); border-radius:14px; display:flex; align-items:center; justify-content:center; font-size:24px; box-shadow:0 2px 12px rgba(0,0,0,0.4); border:1px solid rgba(232,160,32,0.15); }
+  .op1 .empresa { font-size:19px; font-weight:700; letter-spacing:-0.3px; }
+  .op1 .empresa-sub { font-size:12px; color:#a89878; margin-top:2px; }
+  .op1 .card { background:linear-gradient(135deg,#1a1815,#151310); border:1px solid rgba(232,160,32,0.1); border-radius:16px; padding:16px; margin-bottom:12px; box-shadow:0 3px 14px rgba(0,0,0,0.3); transition:transform 0.15s; }
+  .op1 .card:active { transform:scale(0.98); }
+  .op1 .card-borde { border-left:3px solid #4caf7d; }
+  .op1 .badge { display:inline-block; padding:5px 12px; border-radius:20px; background:rgba(76,175,125,0.15); color:#5cc98d; font-size:11px; font-weight:600; }
+  .op1 .ot-num { color:#f0b040; font-weight:700; }
+  .op1 .ot-titulo { font-size:17px; font-weight:700; margin:8px 0; letter-spacing:-0.2px; }
+  .op1 .ot-sub { font-size:13px; color:#998a70; }
+  .op1 .ot-monto { font-size:21px; font-weight:800; color:#f0b040; text-align:right; margin-top:10px; letter-spacing:-0.5px; }
+  .op1 .btn-primary { background:linear-gradient(135deg,#f0b040,#e09818); color:#1a1408; border:none; padding:14px; border-radius:14px; font-weight:700; width:100%; font-size:15px; box-shadow:0 4px 18px rgba(232,160,32,0.25); }
+
+  /* ───────── OPCIÓN 2: ÁMBAR + AZULADO (frío elegante) ───────── */
+  .op2 { --bg:#0a0c10; }
+  .op2 .app-header { background:linear-gradient(135deg,#1c2230,#141821); padding:18px 16px; border-radius:18px; display:flex; align-items:center; gap:14px; margin-bottom:18px; box-shadow:0 4px 24px rgba(80,120,200,0.1); border:1px solid rgba(255,255,255,0.05); }
+  .op2 .logo { width:50px; height:50px; background:linear-gradient(135deg,#e8a020,#c8851a); border-radius:14px; display:flex; align-items:center; justify-content:center; font-size:24px; box-shadow:0 3px 14px rgba(232,160,32,0.3); }
+  .op2 .empresa { font-size:19px; font-weight:700; letter-spacing:-0.3px; }
+  .op2 .empresa-sub { font-size:12px; color:#8595b0; margin-top:2px; }
+  .op2 .card { background:linear-gradient(135deg,#141822,#10131b); border:1px solid rgba(120,150,200,0.1); border-radius:16px; padding:16px; margin-bottom:12px; box-shadow:0 3px 16px rgba(0,0,0,0.35); transition:transform 0.15s; }
+  .op2 .card:active { transform:scale(0.98); }
+  .op2 .card-borde { border-left:3px solid #4caf7d; }
+  .op2 .badge { display:inline-block; padding:5px 12px; border-radius:20px; background:rgba(76,175,125,0.16); color:#5cc98d; font-size:11px; font-weight:600; }
+  .op2 .ot-num { color:#f0b040; font-weight:700; }
+  .op2 .ot-titulo { font-size:17px; font-weight:700; margin:8px 0; letter-spacing:-0.2px; }
+  .op2 .ot-sub { font-size:13px; color:#8090a8; }
+  .op2 .ot-monto { font-size:21px; font-weight:800; color:#f0b040; text-align:right; margin-top:10px; letter-spacing:-0.5px; }
+  .op2 .btn-primary { background:linear-gradient(135deg,#f0b040,#e09818); color:#1a1408; border:none; padding:14px; border-radius:14px; font-weight:700; width:100%; font-size:15px; box-shadow:0 4px 18px rgba(232,160,32,0.28); }
+
+  /* ───────── OPCIÓN 3: ÁMBAR + TEAL (moderno equilibrado) ───────── */
+  .op3 { --bg:#0a0f0e; }
+  .op3 .app-header { background:linear-gradient(135deg,#162824,#122019); padding:18px 16px; border-radius:18px; display:flex; align-items:center; gap:14px; margin-bottom:18px; box-shadow:0 4px 24px rgba(40,160,130,0.1); border:1px solid rgba(76,175,125,0.08); }
+  .op3 .logo { width:50px; height:50px; background:linear-gradient(135deg,#e8a020,#c8851a); border-radius:14px; display:flex; align-items:center; justify-content:center; font-size:24px; box-shadow:0 3px 14px rgba(232,160,32,0.3); }
+  .op3 .empresa { font-size:19px; font-weight:700; letter-spacing:-0.3px; }
+  .op3 .empresa-sub { font-size:12px; color:#7da898; margin-top:2px; }
+  .op3 .card { background:linear-gradient(135deg,#121d1a,#0f1714); border:1px solid rgba(76,175,125,0.1); border-radius:16px; padding:16px; margin-bottom:12px; box-shadow:0 3px 16px rgba(0,0,0,0.35); transition:transform 0.15s; }
+  .op3 .card:active { transform:scale(0.98); }
+  .op3 .card-borde { border-left:3px solid #4caf7d; }
+  .op3 .badge { display:inline-block; padding:5px 12px; border-radius:20px; background:rgba(76,175,125,0.18); color:#5cc98d; font-size:11px; font-weight:600; }
+  .op3 .ot-num { color:#f0b040; font-weight:700; }
+  .op3 .ot-titulo { font-size:17px; font-weight:700; margin:8px 0; letter-spacing:-0.2px; }
+  .op3 .ot-sub { font-size:13px; color:#7d9888; }
+  .op3 .ot-monto { font-size:21px; font-weight:800; color:#f0b040; text-align:right; margin-top:10px; letter-spacing:-0.5px; }
+  .op3 .btn-primary { background:linear-gradient(135deg,#f0b040,#e09818); color:#1a1408; border:none; padding:14px; border-radius:14px; font-weight:700; width:100%; font-size:15px; box-shadow:0 4px 18px rgba(232,160,32,0.28); }
+
+  .demo-wrap { border-radius:20px; padding:14px; }
+  .nota { font-size:12px; color:#666; margin-top:16px; padding:12px; background:rgba(255,255,255,0.03); border-radius:12px; line-height:1.5; }
+</style>
+</head>
+<body>
+  <div class="demo-top">🎨 MUESTRA REFINADA — el punto medio que pediste. Tocá las opciones.</div>
+
+  <div class="selector">
+    <button class="sel-btn active" onclick="verVar('op1', this)">1 · Cálido</button>
+    <button class="sel-btn" onclick="verVar('op2', this)">2 · Azulado</button>
+    <button class="sel-btn" onclick="verVar('op3', this)">3 · Teal</button>
+  </div>
+
+  <!-- OPCIÓN 1 -->
+  <div class="variante op1 active" id="var-op1" style="background:var(--bg);">
+    <div class="v-titulo">🔥 Opción 1 — Ámbar Cálido</div>
+    <div class="v-desc">Tu ámbar como protagonista, con un brillo cálido suave en todo. Degradados sutiles tono sobre tono. Acogedor y moderno, sin saturar. El más fiel a tu identidad.</div>
+    <div class="demo-wrap">
+      <div class="app-header">
+        <div class="logo">⚙️</div>
+        <div><div class="empresa">ELECTROMEL</div><div class="empresa-sub">Servicio Técnico de Soldadoras Inverter</div></div>
+      </div>
+      <div class="card card-borde">
+        <div><span class="badge">EN REPARACIÓN</span></div>
+        <div class="ot-titulo">Eduardo Muñoz</div>
+        <div class="ot-sub">🔧 OT Taller · <span class="ot-num">OTT-00004</span></div>
+        <div class="ot-sub">Cortadora Plasma IPC 9014</div>
+        <div class="ot-monto">$245.000,00</div>
+      </div>
+      <div class="card card-borde">
+        <div><span class="badge">REPARADO</span></div>
+        <div class="ot-titulo">Luis Caballero</div>
+        <div class="ot-sub">🔧 OT Taller · <span class="ot-num">OTT-00005</span></div>
+        <div class="ot-monto">$175.000,00</div>
+      </div>
+      <button class="btn-primary">💾 Guardar</button>
+    </div>
+  </div>
+
+  <!-- OPCIÓN 2 -->
+  <div class="variante op2" id="var-op2" style="background:var(--bg);">
+    <div class="v-titulo">❄️ Opción 2 — Ámbar + Azulado</div>
+    <div class="v-desc">El ámbar se mantiene en logo, números y botones, pero el fondo tira a azul oscuro elegante. Contraste cálido/frío muy moderno, tipo apps premium. Vivo pero sereno.</div>
+    <div class="demo-wrap">
+      <div class="app-header">
+        <div class="logo">⚙️</div>
+        <div><div class="empresa">ELECTROMEL</div><div class="empresa-sub">Servicio Técnico de Soldadoras Inverter</div></div>
+      </div>
+      <div class="card card-borde">
+        <div><span class="badge">EN REPARACIÓN</span></div>
+        <div class="ot-titulo">Eduardo Muñoz</div>
+        <div class="ot-sub">🔧 OT Taller · <span class="ot-num">OTT-00004</span></div>
+        <div class="ot-sub">Cortadora Plasma IPC 9014</div>
+        <div class="ot-monto">$245.000,00</div>
+      </div>
+      <div class="card card-borde">
+        <div><span class="badge">REPARADO</span></div>
+        <div class="ot-titulo">Luis Caballero</div>
+        <div class="ot-sub">🔧 OT Taller · <span class="ot-num">OTT-00005</span></div>
+        <div class="ot-monto">$175.000,00</div>
+      </div>
+      <button class="btn-primary">💾 Guardar</button>
+    </div>
+  </div>
+
+  <!-- OPCIÓN 3 -->
+  <div class="variante op3" id="var-op3" style="background:var(--bg);">
+    <div class="v-titulo">🌿 Opción 3 — Ámbar + Teal</div>
+    <div class="v-desc">El ámbar combinado con un verde-azulado oscuro de fondo. El verde ya está en tus badges de estado, así que combina natural. Fresco, moderno y equilibrado.</div>
+    <div class="demo-wrap">
+      <div class="app-header">
+        <div class="logo">⚙️</div>
+        <div><div class="empresa">ELECTROMEL</div><div class="empresa-sub">Servicio Técnico de Soldadoras Inverter</div></div>
+      </div>
+      <div class="card card-borde">
+        <div><span class="badge">EN REPARACIÓN</span></div>
+        <div class="ot-titulo">Eduardo Muñoz</div>
+        <div class="ot-sub">🔧 OT Taller · <span class="ot-num">OTT-00004</span></div>
+        <div class="ot-sub">Cortadora Plasma IPC 9014</div>
+        <div class="ot-monto">$245.000,00</div>
+      </div>
+      <div class="card card-borde">
+        <div><span class="badge">REPARADO</span></div>
+        <div class="ot-titulo">Luis Caballero</div>
+        <div class="ot-sub">🔧 OT Taller · <span class="ot-num">OTT-00005</span></div>
+        <div class="ot-monto">$175.000,00</div>
+      </div>
+      <button class="btn-primary">💾 Guardar</button>
+    </div>
+  </div>
+
+  <div class="nota">💡 Las tres mantienen tu ámbar y son menos intensas que la opción "Vibrante" violeta. Cambian el ambiente de fondo y el brillo. Una vez que elijas, ajusto los detalles que quieras antes de aplicarlo.</div>
+
+<script>
+  function verVar(v, el) {
+    document.querySelectorAll('.variante').forEach(x => x.classList.remove('active'));
+    document.getElementById('var-' + v).classList.add('active');
+    document.querySelectorAll('.sel-btn').forEach(b => b.classList.remove('active'));
+    el.classList.add('active');
+  }
+</script>
+</body>
+</html>

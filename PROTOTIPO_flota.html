@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prototipo — Flota de máquinas</title>
+<style>
+  :root{
+    --bg:#0f0f0f; --surface:#1a1a1a; --surface-2:#232323;
+    --acento:#e8a020; --exito:#4caf7d; --peligro:#e05050;
+    --texto:#f0f0f0; --texto-2:#888; --borde:#2a2a2a;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{background:var(--bg); color:var(--texto); font-family:system-ui,Arial,sans-serif; padding-bottom:90px;}
+  .demo-banner{background:var(--acento); color:#000; text-align:center; padding:8px; font-size:13px; font-weight:600;}
+  .tabs{display:flex; background:var(--surface); border-bottom:1px solid var(--borde); position:sticky; top:0; z-index:10;}
+  .tab{flex:1; padding:14px 8px; text-align:center; font-size:13px; font-weight:600; color:var(--texto-2); cursor:pointer; border-bottom:2px solid transparent;}
+  .tab.active{color:var(--acento); border-bottom-color:var(--acento);}
+  .vista{display:none; padding:16px 14px;}
+  .vista.active{display:block;}
+  .header{font-size:17px; font-weight:600; margin-bottom:4px; display:flex; align-items:center; gap:8px;}
+  .sub{font-size:13px; color:var(--texto-2); margin-bottom:16px; line-height:1.4;}
+  .card{background:var(--surface); border:1px solid var(--borde); border-radius:12px; padding:14px; margin-bottom:12px;}
+
+  /* Vista 1: cargar flota */
+  .maquina{background:var(--surface-2); border:1px solid var(--borde); border-radius:10px; padding:12px; margin-bottom:8px; display:flex; align-items:center; gap:12px;}
+  .maquina-num{width:32px; height:32px; border-radius:8px; background:var(--acento); color:#000; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:14px; flex-shrink:0;}
+  .maquina-info{flex:1;}
+  .maquina-marca{font-weight:600; font-size:15px;}
+  .maquina-id{font-size:12px; color:var(--texto-2); margin-top:2px;}
+  .maquina-del{color:var(--peligro); font-size:20px; cursor:pointer; padding:4px 8px;}
+  .btn-add{width:100%; padding:12px; border-radius:10px; border:1px dashed var(--acento); background:rgba(232,160,32,.08); color:var(--acento); font-size:14px; font-weight:600; cursor:pointer; margin-top:4px;}
+
+  /* Vista 2: OTE de mantenimiento */
+  .ote-maquina{background:var(--surface-2); border:1px solid var(--borde); border-radius:10px; padding:12px; margin-bottom:10px;}
+  .ote-maquina-top{display:flex; align-items:center; gap:12px;}
+  .check{width:28px; height:28px; border-radius:7px; border:2px solid var(--borde); display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0; font-size:16px; background:var(--bg);}
+  .check.marcado{background:var(--exito); border-color:var(--exito); color:#000;}
+  .ote-maquina-info{flex:1;}
+  .estados{display:flex; gap:6px; margin-top:10px;}
+  .estado-btn{flex:1; padding:7px; border-radius:7px; border:1px solid var(--borde); background:var(--bg); color:var(--texto-2); font-size:12px; font-weight:600; cursor:pointer; text-align:center;}
+  .estado-btn.sel-ok{background:rgba(76,175,125,.18); border-color:var(--exito); color:var(--exito);}
+  .estado-btn.sel-obs{background:rgba(232,160,32,.18); border-color:var(--acento); color:var(--acento);}
+  .estado-btn.sel-baja{background:rgba(224,80,80,.18); border-color:var(--peligro); color:var(--peligro);}
+  .nota-baja{font-size:12px; color:var(--peligro); margin-top:8px; font-style:italic;}
+  .resumen-ote{background:var(--surface); border:1px solid var(--acento); border-radius:10px; padding:12px; margin-top:14px; font-size:13px;}
+  .resumen-ote b{color:var(--acento);}
+  .btn-primary{width:100%; padding:13px; border-radius:10px; border:none; background:var(--acento); color:#000; font-weight:700; font-size:15px; cursor:pointer; margin-top:14px;}
+</style>
+</head>
+<body>
+  <div class="demo-banner">⚠️ PROTOTIPO — solo para visualizar. No es la app real.</div>
+
+  <div class="tabs">
+    <div class="tab active" onclick="verVista('cargar', this)">1. Cargar flota</div>
+    <div class="tab" onclick="verVista('ote', this)">2. OTE mantenimiento</div>
+  </div>
+
+  <!-- VISTA 1: CARGAR FLOTA -->
+  <div class="vista active" id="vista-cargar">
+    <div class="header">🏋️ Gimnasio Olimpo</div>
+    <div class="sub">Cargá cada máquina como un ítem. En vez de escribir "6 máquinas", tenés la lista real para hacerle seguimiento a cada una.</div>
+
+    <div class="card">
+      <div class="maquina">
+        <div class="maquina-num">1</div>
+        <div class="maquina-info">
+          <div class="maquina-marca">Lusqtoff — Trotadora T200</div>
+          <div class="maquina-id">N° interno: GO-01</div>
+        </div>
+        <div class="maquina-del">✕</div>
+      </div>
+      <div class="maquina">
+        <div class="maquina-num">2</div>
+        <div class="maquina-info">
+          <div class="maquina-marca">Lusqtoff — Trotadora T200</div>
+          <div class="maquina-id">N° interno: GO-02</div>
+        </div>
+        <div class="maquina-del">✕</div>
+      </div>
+      <div class="maquina">
+        <div class="maquina-num">3</div>
+        <div class="maquina-info">
+          <div class="maquina-marca">Randers — Elíptica E50</div>
+          <div class="maquina-id">N° interno: GO-03</div>
+        </div>
+        <div class="maquina-del">✕</div>
+      </div>
+      <div class="maquina">
+        <div class="maquina-num">4</div>
+        <div class="maquina-info">
+          <div class="maquina-marca">Olmo — Bici fija B100</div>
+          <div class="maquina-id">N° interno: GO-04</div>
+        </div>
+        <div class="maquina-del">✕</div>
+      </div>
+      <button class="btn-add" onclick="alert('Acá se abriría un mini formulario: Marca, Modelo, N° de identificación.')">+ Agregar máquina</button>
+    </div>
+    <div class="sub">Cada máquina guarda: marca, modelo y un número de identificación interno tuyo.</div>
+  </div>
+
+  <!-- VISTA 2: OTE MANTENIMIENTO -->
+  <div class="vista" id="vista-ote">
+    <div class="header">🔧 OTE — Mantenimiento Gimnasio Olimpo</div>
+    <div class="sub">Tildá cada máquina a la que le hiciste el service y marcá su estado. Al final queda la constancia para el cliente.</div>
+
+    <div class="ote-maquina">
+      <div class="ote-maquina-top">
+        <div class="check marcado" onclick="toggleCheck(this)">✓</div>
+        <div class="ote-maquina-info">
+          <div class="maquina-marca">Lusqtoff — Trotadora T200</div>
+          <div class="maquina-id">GO-01</div>
+        </div>
+      </div>
+      <div class="estados">
+        <div class="estado-btn sel-ok" onclick="setEstado(this,'ok')">OK</div>
+        <div class="estado-btn" onclick="setEstado(this,'obs')">Observación</div>
+        <div class="estado-btn" onclick="setEstado(this,'baja')">Baja</div>
+      </div>
+    </div>
+
+    <div class="ote-maquina">
+      <div class="ote-maquina-top">
+        <div class="check marcado" onclick="toggleCheck(this)">✓</div>
+        <div class="ote-maquina-info">
+          <div class="maquina-marca">Lusqtoff — Trotadora T200</div>
+          <div class="maquina-id">GO-02</div>
+        </div>
+      </div>
+      <div class="estados">
+        <div class="estado-btn" onclick="setEstado(this,'ok')">OK</div>
+        <div class="estado-btn sel-obs" onclick="setEstado(this,'obs')">Observación</div>
+        <div class="estado-btn" onclick="setEstado(this,'baja')">Baja</div>
+      </div>
+    </div>
+
+    <div class="ote-maquina">
+      <div class="ote-maquina-top">
+        <div class="check marcado" onclick="toggleCheck(this)">✓</div>
+        <div class="ote-maquina-info">
+          <div class="maquina-marca">Randers — Elíptica E50</div>
+          <div class="maquina-id">GO-03</div>
+        </div>
+      </div>
+      <div class="estados">
+        <div class="estado-btn sel-ok" onclick="setEstado(this,'ok')">OK</div>
+        <div class="estado-btn" onclick="setEstado(this,'obs')">Observación</div>
+        <div class="estado-btn" onclick="setEstado(this,'baja')">Baja</div>
+      </div>
+    </div>
+
+    <div class="ote-maquina">
+      <div class="ote-maquina-top">
+        <div class="check" onclick="toggleCheck(this)"></div>
+        <div class="ote-maquina-info">
+          <div class="maquina-marca">Olmo — Bici fija B100</div>
+          <div class="maquina-id">GO-04</div>
+        </div>
+      </div>
+      <div class="estados">
+        <div class="estado-btn" onclick="setEstado(this,'ok')">OK</div>
+        <div class="estado-btn" onclick="setEstado(this,'obs')">Observación</div>
+        <div class="estado-btn sel-baja" onclick="setEstado(this,'baja')">Baja</div>
+      </div>
+      <div class="nota-baja">⚠️ Esta máquina se dará de baja y saldrá de la lista para el próximo mantenimiento.</div>
+    </div>
+
+    <div class="resumen-ote">
+      📋 Resumen: <b>3 máquinas con service</b> · 1 con observación · <b>1 baja</b><br>
+      Quedará un OTE de constancia con el detalle de cada máquina.
+    </div>
+
+    <button class="btn-primary" onclick="alert('Se generaría el OTE con el detalle de cada máquina, sus estados, y la baja saldría de la lista.')">✓ Generar OTE de constancia</button>
+  </div>
+
+<script>
+  function verVista(v, el){
+    document.querySelectorAll('.vista').forEach(x=>x.classList.remove('active'));
+    document.getElementById('vista-'+v).classList.add('active');
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    el.classList.add('active');
+  }
+  function toggleCheck(el){
+    el.classList.toggle('marcado');
+    el.textContent = el.classList.contains('marcado') ? '✓' : '';
+  }
+  function setEstado(el, tipo){
+    const cont = el.parentElement;
+    cont.querySelectorAll('.estado-btn').forEach(b=>b.className='estado-btn');
+    el.classList.add(tipo==='ok'?'sel-ok':tipo==='obs'?'sel-obs':'sel-baja');
+  }
+</script>
+</body>
+</html>

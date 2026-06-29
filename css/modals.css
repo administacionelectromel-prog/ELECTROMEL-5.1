@@ -1,0 +1,219 @@
+/** ELECTROMEL — modals.css | Modales fullscreen, toast, collapsibles */
+
+/* ════════════════════════════════════════════════════════════════
+   MODALES (full-screen)
+   ════════════════════════════════════════════════════════════════ */
+.modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  z-index: var(--z-modal);
+  flex-direction: column;
+  animation: modalSlide 0.2s ease-out;
+}
+
+.modal.active { display: flex; }
+
+@keyframes modalSlide {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+
+.modal-header {
+  height: var(--h-header);
+  padding-top: env(safe-area-inset-top);
+  height: calc(var(--h-header) + env(safe-area-inset-top));
+  background: linear-gradient(180deg, var(--header-bg) 0%, var(--header-bg-2) 100%);
+  border-bottom: 1px solid var(--borde-2);
+  display: flex;
+  align-items: center;
+  padding-left: 8px;
+  padding-right: 14px;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.modal-close {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  color: var(--texto);
+  flex-shrink: 0;
+}
+
+.modal-title {
+  flex: 1;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+}
+
+.modal-action {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--acento);
+  padding: 8px 12px;
+  flex-shrink: 0;
+}
+
+.modal-body {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 14px;
+  padding-bottom: calc(14px + env(safe-area-inset-bottom));
+}
+
+.modal-footer {
+  border-top: 1px solid var(--borde);
+  padding: 12px 14px;
+  padding-bottom: calc(12px + env(safe-area-inset-bottom));
+  background: var(--surface);
+  display: flex;
+  gap: 8px;
+}
+
+.modal-footer .btn { flex: 1; }
+
+/* Footer apilado: para modales con muchos botones de ancho completo
+   (modales de éxito ING/OTT/OTE/PRE). Evita que se corten en horizontal. */
+.modal-footer.modal-footer-stack {
+  flex-direction: column;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+.modal-footer.modal-footer-stack .btn { flex: none; width: 100%; }
+
+/* ════════════════════════════════════════════════════════════════
+   TOAST
+   ════════════════════════════════════════════════════════════════ */
+#toast-container {
+  position: fixed;
+  top: calc(var(--h-header) + env(safe-area-inset-top) + 12px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: var(--z-toast);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+  width: calc(100% - 28px);
+  max-width: 420px;
+}
+
+.toast {
+  background: var(--surface-2);
+  border: 1px solid var(--borde-2);
+  border-left: 3px solid var(--acento);
+  border-radius: var(--r-sm);
+  padding: 11px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--texto);
+  box-shadow: var(--sh-3);
+  animation: toastIn 0.22s ease-out, toastOut 0.25s ease-in 2.6s forwards;
+  pointer-events: auto;
+}
+
+.toast.toast-success { border-left-color: var(--exito); }
+.toast.toast-error   { border-left-color: var(--peligro); }
+.toast.toast-warn    { border-left-color: var(--warn); }
+
+@keyframes toastIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes toastOut {
+  to { opacity: 0; transform: translateY(-8px); }
+}
+
+/* ════════════════════════════════════════════════════════════════
+   COLLAPSIBLES (construidos dinámicamente por JS)
+   ════════════════════════════════════════════════════════════════ */
+.collapsible {
+  background: var(--surface);
+  border: 1px solid var(--borde);
+  border-radius: var(--r);
+  margin-bottom: 10px;
+  overflow: hidden;
+}
+
+.collapsible-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.collapsible-header-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+}
+
+.collapsible-arrow {
+  font-size: 12px;
+  color: var(--texto-2);
+  transition: transform 0.2s;
+}
+
+.collapsible.open .collapsible-arrow {
+  transform: rotate(180deg);
+}
+
+.collapsible-body {
+  display: none;
+  padding: 0 14px 14px 14px;
+  border-top: 1px solid var(--borde);
+  padding-top: 14px;
+}
+
+.collapsible.open .collapsible-body {
+  display: block;
+}
+/* ════════════════════════════════════════════════════════════════
+   GALERÍA DE FOTOS
+   ════════════════════════════════════════════════════════════════ */
+.fotos-galeria {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.foto-item {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: var(--r-sm, 8px);
+  overflow: hidden;
+  background: var(--surface-2);
+}
+
+.foto-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  cursor: pointer;
+}
+
+.foto-del {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: rgba(0,0,0,0.6);
+  border: none;
+  border-radius: 6px;
+  padding: 4px 6px;
+  font-size: 14px;
+  cursor: pointer;
+}
