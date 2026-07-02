@@ -1,0 +1,1802 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+
+<!-- PWA -->
+<meta name="theme-color" content="#1a1a1a">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ELECTROMEL">
+<meta name="format-detection" content="telephone=no">
+<meta name="description" content="ELECTROMEL - ERP Taller Electromecánico">
+<title>ELECTROMEL - ERP</title>
+
+<link rel="manifest" href="./manifest.json">
+<link rel="apple-touch-icon" href="./icons/icon-192.png">
+
+<!-- CSS modular -->
+<link rel="stylesheet" href="./css/variables.css">
+<link rel="stylesheet" href="./css/reset.css">
+<link rel="stylesheet" href="./css/layout.css">
+<link rel="stylesheet" href="./css/components.css">
+<link rel="stylesheet" href="./css/modals.css">
+<link rel="stylesheet" href="./css/panels.css">
+<link rel="stylesheet" href="./css/agenda.css">
+
+<!-- CDN libs (cacheadas por SW en primera carga) -->
+<script src="./libs/jspdf.umd.min.js"></script>
+<script src="./libs/jspdf.plugin.autotable.min.js"></script>
+<script src="./libs/qrcode.min.js"></script>
+</head>
+<body>
+  <datalist id="zonas-datalist-global"></datalist>
+
+<div id="app">
+
+  <!-- ═══════════════════════════════
+       HEADER
+       ═══════════════════════════════ -->
+  <header id="header">
+    <div id="header-logo" title="ELECTROMEL">
+      <!-- Logo dinámico: se carga desde config o usa SVG de fallback -->
+      <img class="empresa-logo hide" src="" alt="ELECTROMEL">
+      <svg class="logo-fallback" viewBox="0 0 44 44" width="44" height="44">
+        <rect width="44" height="44" rx="8" fill="#1a1a1a"/>
+        <polygon points="25,4 16,22 22,22 20,40 30,20 23,20" fill="#e8a020"/>
+      </svg>
+    </div>
+    <div id="header-titles">
+      <div id="header-title">ELECTROMEL</div>
+      <div id="header-sub">Servicio Técnico de Soldadoras Inverter</div>
+    </div>
+    <div id="header-base" style="display:none;">SMA</div>
+  </header>
+
+  <!-- Banner de actualización SW -->
+  <div id="sw-update-banner" class="sw-update-banner hide">
+    <span>Nueva versión disponible</span>
+    <button type="button" onclick="reloadApp()">Actualizar</button>
+  </div>
+
+  <!-- ═══════════════════════════════
+       MAIN — paneles
+       ═══════════════════════════════ -->
+  <main id="main">
+
+    <!-- ── PANEL: PRINCIPAL ──────────────────────────────── -->
+    <section id="panel-panel" class="panel active">
+
+      <div id="panel-hoy" class="panel-hoy"></div>
+
+      <div class="panel-topbar">
+        <div class="panel-search">
+          <input type="text" id="panel-search" placeholder="🔍 Buscar por cliente, número o equipo..." oninput="_onPanelSearch()">
+        </div>
+        <select id="panel-anio" onchange="filtrarPanelAnio(this.value)" style="margin:0 14px 8px; padding:8px 10px; border-radius:8px; background:var(--surface-2); color:var(--texto); border:1px solid var(--borde);">
+          <option value="TODOS">📅 Todos los años</option>
+        </select>
+        <div class="panel-filtros" id="panel-filtros">
+          <button class="panel-filtro active" data-filtro="TODOS"  onclick="filtrarPanel('TODOS')">TODOS</button>
+          <button class="panel-filtro"        data-filtro="ING"    onclick="filtrarPanel('ING')">ING</button>
+          <button class="panel-filtro"        data-filtro="OTT"    onclick="filtrarPanel('OTT')">TALLER</button>
+          <button class="panel-filtro"        data-filtro="OTE"    onclick="filtrarPanel('OTE')">EXTERIOR</button>
+          <button class="panel-filtro"        data-filtro="PRE"    onclick="filtrarPanel('PRE')">PRESUP.</button>
+        </div>
+      </div>
+
+      <!-- Banner alertas WhatsApp -->
+      <div id="alertas-wa-banner" class="alertas-wa hide">
+        <div class="alertas-wa-content">
+          <span class="alertas-wa-icon">💬</span>
+          <div class="alertas-wa-text">
+            <strong id="alertas-wa-count">0</strong> recordatorio(s) por enviar
+            <div class="dim txt-sm" id="alertas-wa-detail"></div>
+          </div>
+          <button class="btn btn-ghost btn-sm" type="button" onclick="abrirPanelAlertasWA()">Ver →</button>
+        </div>
+      </div>
+
+      <!-- Stats semáforo -->
+      <div class="panel-stats" id="panel-stats">
+        <div class="stat-chip stat-rojo"><span class="stat-dot"></span><span id="stat-rojo">0</span> urgentes</div>
+        <div class="stat-chip stat-amarillo"><span class="stat-dot"></span><span id="stat-amarillo">0</span> atención</div>
+        <div class="stat-chip stat-verde"><span class="stat-dot"></span><span id="stat-verde">0</span> ok</div>
+      </div>
+
+      <!-- Lista de registros activos -->
+      <div id="panel-lista">
+        <div class="loading-panel">
+          <div class="dim txt-sm">Cargando...</div>
+        </div>
+      </div>
+
+      <!-- Archivados -->
+      <div class="archivados-section">
+        <button class="archivados-header" type="button" onclick="toggleArchivados()">
+          <span class="archivados-icon" id="archivados-icon">▶</span>
+          <span class="archivados-title">Archivados</span>
+          <span class="archivados-count dim txt-sm" id="archivados-count"></span>
+        </button>
+        <div id="panel-archivados" class="archivados-body hide"></div>
+      </div>
+
+      <!-- Info próximos números -->
+      <div id="panel-info-numeros" class="panel-info-numeros dim txt-sm hide">
+        Próx: <span id="info-next-ing">—</span> · <span id="info-next-ott">—</span> · <span id="info-next-ote">—</span> · <span id="info-next-pre">—</span>
+      </div>
+    </section>
+
+    <!-- ── PANEL: AGENDA ─────────────────────────────────── -->
+    <section id="panel-agenda" class="panel">
+      <div class="agenda-nav">
+        <button class="btn btn-ghost btn-sm" type="button" onclick="semanaAnterior()" aria-label="Semana anterior">◀</button>
+        <span class="agenda-semana-label" id="agenda-semana-label">Esta semana</span>
+        <button class="btn btn-ghost btn-sm" type="button" onclick="semanaSiguiente()" aria-label="Semana siguiente">▶</button>
+        <button class="btn btn-primary btn-sm agenda-btn-hoy" type="button" id="agenda-btn-hoy" onclick="agendaIrAHoy()" aria-label="Volver a hoy">Hoy</button>
+      </div>
+
+      <div id="agenda-resumen-semana" class="agenda-resumen-semana"></div>
+
+      <div class="agenda-filtros" id="agenda-filtros-zona">
+        <button class="panel-filtro active" data-zona="TODOS" onclick="filtrarAgendaZona('TODOS')">TODAS</button>
+        <!-- Las zonas se agregan dinámicamente -->
+      </div>
+
+      <div id="nqn-banner" class="nqn-banner hide">
+        <div class="nqn-banner-content">
+          <div class="nqn-banner-icon" id="nqn-banner-icon">🚐</div>
+          <div class="nqn-banner-text">
+            <div class="nqn-banner-title" id="nqn-banner-title">Viaje a NQN</div>
+            <div class="nqn-banner-detail" id="nqn-banner-detail">—</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── MANTENIMIENTOS PROGRAMADOS (compacto: solo buscador) ─── -->
+      <div class="mant-seccion">
+        <div class="row center" style="gap:8px;">
+          <input type="text" id="mant-search" placeholder="🔍 Buscar mantenimiento (cliente, equipo o zona)..." oninput="renderMantenimientos()" style="flex:1; padding:9px 12px; border-radius:8px; border:1px solid var(--borde); background:var(--surface-2); color:var(--texto);">
+          <button class="btn btn-ghost btn-sm" type="button" onclick="abrirFormularioMantenimiento()" aria-label="Nuevo mantenimiento" title="Nuevo mantenimiento">+</button>
+        </div>
+        <div id="mant-lista"></div>
+      </div>
+
+      <!-- ── VIAJE DEL PERÍODO ACTUAL (hoy entre salida y regreso) ─── -->
+      <div id="agenda-viaje-actual"></div>
+
+      <div id="agenda-dias">
+        <div class="empty">
+          <div class="empty-icon">📅</div>
+          <div class="empty-text">Sin turnos esta semana.<br>Tocá <span class="acento bold">+ Turno</span> para agregar uno.</div>
+        </div>
+      </div>
+
+      <!-- ── VIAJES OPERATIVOS (Gasto Operativo v6.8) ──────── -->
+      <div class="agenda-viajes-wrapper" style="margin-top:14px;">
+        <div class="card-title" style="display:flex;align-items:center;justify-content:space-between;">
+          <span>🗺️ Viajes Operativos</span>
+          <button class="btn btn-ghost btn-sm" type="button" onclick="abrirFormularioViajeOp()">+ Viaje</button>
+        </div>
+        <div id="agenda-viajes-sugerencias"></div>
+        <div id="agenda-viajes-list"><div class="dim txt-sm">Cargando viajes...</div></div>
+      </div>
+
+      <div class="agenda-iq-wrapper">
+        <button class="archivados-header" type="button" onclick="toggleAgendaIQ()">
+          <span class="archivados-icon" id="agenda-iq-icon">▶</span>
+          <span class="archivados-title">🧠 Inteligencia de Agenda</span>
+        </button>
+        <div id="agenda-iq-body" class="archivados-body hide">
+          <div class="card">
+            <div class="card-title">Análisis de la semana</div>
+            <div id="agenda-iq-resumen" class="dim txt-sm">Cargando...</div>
+          </div>
+          <div class="card">
+            <div class="card-title">Sugerencias</div>
+            <div id="agenda-iq-sugerencias"></div>
+          </div>
+          <button class="btn btn-ghost btn-block" type="button" onclick="generateOptimalWeek()">📈 Ver semana óptima propuesta</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── PANEL: ADMINISTRACIÓN ─────────────────────────── -->
+    <section id="panel-contabilidad" class="panel">
+
+      <!-- 1. CAJA -->
+      <div class="admin-section" data-collapsible="false">
+        <div class="card" id="admin-caja-card">
+          <div class="card-title">💵 Caja (hoy y esta semana)</div>
+          <div id="admin-caja-body"><div class="dim txt-sm">Cargando...</div></div>
+        </div>
+      </div>
+
+      <!-- 2. POR COBRAR -->
+      <div class="admin-section" data-collapsible="false">
+        <div class="card" id="admin-porcobrar-card">
+          <div class="card-title">💰 Por cobrar (trabajos aprobados)</div>
+          <div id="admin-porcobrar-body"><div class="dim txt-sm">Cargando...</div></div>
+        </div>
+      </div>
+
+      <!-- CAMPAÑAS / MARKETING -->
+      <div class="admin-section" data-collapsible="true" data-title="📈 Campañas (de dónde llegan tus clientes)">
+        <div id="campanias-panel"><div class="dim txt-sm">Cargando campañas...</div></div>
+      </div>
+
+      <!-- 3. DASHBOARD SEMANAL -->
+      <div class="admin-section" data-collapsible="false">
+        <div class="card" id="admin-dashboard-card">
+          <div class="card-title">📊 Dashboard semanal</div>
+          <div id="admin-dashboard-body"><div class="dim txt-sm">Cargando...</div></div>
+        </div>
+      </div>
+
+      <!-- 4. REPORTE DE PERÍODO (PDF) — plegable -->
+      <div class="admin-section" data-collapsible="true" data-title="📄 Reporte de período (PDF)">
+        <div class="card">
+          <div class="dim txt-sm mb-6">Elegí las fechas y generá un PDF con equipos, plata, zonas y suscripciones del período, para imprimir.</div>
+          <div class="field-row">
+            <div class="field">
+              <label class="field-label">Desde</label>
+              <input type="date" id="reporte-desde">
+            </div>
+            <div class="field">
+              <label class="field-label">Hasta</label>
+              <input type="date" id="reporte-hasta">
+            </div>
+          </div>
+          <button class="btn btn-primary btn-block" type="button" onclick="generarReportePeriodoUI()" style="margin-top:8px;">📄 Generar reporte PDF</button>
+        </div>
+      </div>
+
+      <!-- 6. MÉTRICAS DEL NEGOCIO -->
+      <div class="admin-section" data-collapsible="true" data-title="📈 Métricas del negocio">
+        <div id="admin-metricas-body"><div class="dim txt-sm">Cargando métricas...</div></div>
+      </div>
+
+      <!-- 7. CARGAR EGRESO MANUAL -->
+      <div class="admin-section" data-collapsible="true" data-title="💸 Cargar egreso manual">
+        <div class="card">
+          <div class="field">
+            <label class="field-label">Concepto *</label>
+            <input type="text" id="egreso-concepto" placeholder="Ej: Compra de componentes">
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label class="field-label">Monto *</label>
+              <input type="number" id="egreso-monto" placeholder="0">
+            </div>
+            <div class="field">
+              <label class="field-label">Categoría</label>
+              <select id="egreso-categoria">
+                <option value="componente">Componente</option>
+                <option value="logistica">Logística</option>
+                <option value="viatico">Viático</option>
+                <option value="alquiler">Alquiler</option>
+                <option value="otro">Otro</option>
+              </select>
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label class="field-label">Fecha</label>
+              <input type="date" id="egreso-fecha">
+            </div>
+            <div class="field">
+              <label class="field-label">Base</label>
+              <input type="hidden" id="egreso-base" value="SMA">
+              <div class="dim txt-sm">San Martín de los Andes</div>
+            </div>
+          </div>
+          <div class="field">
+            <label class="field-label">Notas</label>
+            <input type="text" id="egreso-notas" placeholder="Opcional">
+          </div>
+          <button class="btn btn-primary btn-block" type="button" onclick="guardarEgresoManual()">💾 Registrar egreso</button>
+        </div>
+      </div>
+
+      <!-- 8. ASISTENTE -->
+      <div class="admin-section" data-collapsible="true" data-title="🤖 Asistente">
+        <div class="card">
+          <div class="card-title">Análisis del período</div>
+          <div class="field">
+            <select id="admin-asistente-periodo" onchange="renderAdminAsistente()">
+              <option value="week">Esta semana</option>
+              <option value="month">Este mes</option>
+              <option value="year">Este año</option>
+            </select>
+          </div>
+          <div id="admin-asistente-body"><div class="dim txt-sm">Cargando...</div></div>
+        </div>
+      </div>
+
+      <!-- 9. MODO JEFE -->
+      <div class="admin-section" data-collapsible="true" data-title="👔 Modo Jefe">
+        <div class="field">
+          <select id="admin-jefe-periodo" onchange="renderAdminJefe()">
+            <option value="week">Esta semana</option>
+            <option value="month">Este mes</option>
+            <option value="year">Este año</option>
+          </select>
+        </div>
+        <div id="admin-jefe-body"><div class="dim txt-sm">Cargando métricas ejecutivas...</div></div>
+      </div>
+
+      <!-- 10. REPORTE FINANCIERO (movimientos) -->
+      <div class="admin-section" data-collapsible="true" data-title="💳 Reporte financiero">
+        <div class="card">
+          <div class="field-row">
+            <div class="field">
+              <label class="field-label">Filtro</label>
+              <select id="admin-movs-filtro" onchange="_onAdminMovsFiltro()">
+                <option value="all">Todos</option>
+                <option value="income">Ingresos</option>
+                <option value="expense">Egresos</option>
+              </select>
+            </div>
+            <div class="field">
+              <label class="field-label">Desde</label>
+              <input type="date" id="admin-movs-desde" onchange="_onAdminMovsFiltro()">
+            </div>
+            <div class="field">
+              <label class="field-label">Hasta</label>
+              <input type="date" id="admin-movs-hasta" onchange="_onAdminMovsFiltro()">
+            </div>
+          </div>
+          <div id="admin-movs-body"></div>
+          <button class="btn btn-ghost btn-block btn-sm" type="button" onclick="exportarCSVMovs()">📥 Exportar CSV</button>
+        </div>
+      </div>
+
+
+      <div class="admin-section" data-collapsible="true" data-title="🗺️ Archivo de viajes">
+        <div id="admin-archivo-viajes-body"><div class="dim txt-sm">Cargando...</div></div>
+      </div>
+
+      <div class="admin-section" data-collapsible="true" data-title="📦 Stock de componentes">
+        <div id="admin-stock-body"></div>
+        <div class="card" style="background:var(--surface-2);">
+          <div class="field-row">
+            <div class="field"><label class="field-label">Componente</label><input type="text" id="stock-nombre" placeholder="Nombre"></div>
+            <div class="field"><label class="field-label">Cant.</label><input type="number" id="stock-cant" placeholder="0" min="0"></div>
+          </div>
+          <div class="field-row">
+            <div class="field"><label class="field-label">Mínimo</label><input type="number" id="stock-min" placeholder="0" min="0"></div>
+            <div class="field"><label class="field-label">Notas</label><input type="text" id="stock-notas" placeholder="Opcional"></div>
+          </div>
+          <button class="btn btn-primary btn-block" type="button" onclick="agregarStock()">➕ Agregar</button>
+        </div>
+      </div>
+
+      <div class="admin-section" data-collapsible="true" data-title="🗓️ Alquileres y vencimientos">
+        <div id="admin-alquileres-body"></div>
+        <div class="card" style="background:var(--surface-2);">
+          <div class="field"><label class="field-label">Descripción *</label><input type="text" id="alquiler-desc" placeholder="Ej: Alquiler local SMA"></div>
+          <div class="field-row">
+            <div class="field"><label class="field-label">Monto mensual</label><input type="number" id="alquiler-monto" placeholder="0"></div>
+            <div class="field"><label class="field-label">Vencimiento (día)</label><input type="number" id="alquiler-dia" placeholder="1" min="1" max="31"></div>
+          </div>
+          <div class="field"><label class="field-label">Notas</label><input type="text" id="alquiler-notas"></div>
+          <button class="btn btn-primary btn-block" type="button" onclick="agregarAlquiler()">➕ Agregar</button>
+        </div>
+      </div>
+
+      <div class="admin-section" data-collapsible="true" data-title="👥 Base de clientes">
+        <div class="field">
+          <input type="text" id="clientes-search" placeholder="🔍 Buscar cliente..." oninput="_onClientesSearch()">
+        </div>
+        <div id="admin-clientes-body"></div>
+      </div>
+
+      <div class="admin-section" data-collapsible="true" data-title="🔍 Auditoría">
+        <div class="field">
+          <select id="audit-filtro-tipo" onchange="renderAdminAuditLog()">
+            <option value="">Todos los eventos</option>
+            <option value="ORDER_CREATED">Órdenes creadas</option>
+            <option value="ORDER_PAID">Pagos</option>
+            <option value="ORDER_STATE_CHANGED">Cambios de estado</option>
+          </select>
+        </div>
+        <div id="admin-audit-body"></div>
+      </div>
+
+    </section>
+
+    <!-- ── PANEL: ABONOS ─────────────────────────────────── -->
+    <section id="panel-abonos" class="panel">
+      <div class="panel-search" style="padding:12px 14px;">
+        <input type="text" id="abonos-search" placeholder="🔍 Buscar cliente, equipo o zona..." oninput="buscarAbonos(this.value)">
+      </div>
+      <div id="abonos-resumen" class="agenda-resumen-semana"></div>
+      <div class="resumen" id="abonos-kpis" style="display:flex; gap:10px; padding:0 14px 12px; flex-wrap:wrap;"></div>
+      <div style="padding:0 14px 12px;">
+        <button class="btn btn-primary btn-block" type="button" onclick="abrirFormularioAbono()">+ Nuevo cliente con suscripción</button>
+      </div>
+      <div id="abonos-lista"></div>
+    </section>
+
+    <!-- ── PANEL: CONFIGURACIÓN ──────────────────────────── -->
+    <section id="panel-config" class="panel">
+      <!-- Contenido generado dinámicamente por config.js -->
+      <div id="config-content">
+        <div class="dim txt-sm" style="padding:20px;">Cargando configuración...</div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ═══════════════════════════════
+       NAV INFERIOR
+       ═══════════════════════════════ -->
+  <nav id="nav">
+    <button class="nav-btn active" data-tab="panel" type="button">
+      <span class="nav-icon">📋</span>
+      <span class="nav-label">Panel</span>
+    </button>
+    <button class="nav-btn" data-tab="agenda" type="button">
+      <span class="nav-icon">📅</span>
+      <span class="nav-label">Agenda</span>
+    </button>
+    <button class="nav-btn" data-tab="abonos" type="button">
+      <span class="nav-icon">💳</span>
+      <span class="nav-label">Suscrip.</span>
+    </button>
+    <button class="nav-btn" data-tab="contabilidad" type="button">
+      <span class="nav-icon">💰</span>
+      <span class="nav-label">Admin</span>
+    </button>
+    <button class="nav-btn" data-tab="config" type="button">
+      <span class="nav-icon">⚙️</span>
+      <span class="nav-label">Config</span>
+    </button>
+  </nav>
+
+  <!-- ═══════════════════════════════
+       FAB
+       ═══════════════════════════════ -->
+  <div id="fab-container">
+    <button id="fab-btn" type="button" class="fab" onclick="_toggleFab()">+</button>
+    <div id="fab-menu" class="fab-menu hide">
+      <button class="fab-item" type="button" onclick="_fabAction('ing')"><span>📥</span> Nuevo ING</button>
+      <button class="fab-item" type="button" onclick="_fabAction('ott')"><span>🔧</span> Nueva OTT</button>
+      <button class="fab-item" type="button" onclick="_fabAction('ote')"><span>🚐</span> Nueva OTE</button>
+      <button class="fab-item" type="button" onclick="_fabAction('pre')"><span>📝</span> Nuevo PRE</button>
+      <button class="fab-item" type="button" onclick="_fabAction('turno')"><span>📅</span> Nuevo Turno</button>
+      <div class="fab-separador"></div>
+      <button class="fab-item fab-item-sec" type="button" onclick="_fabAction('visita')"><span>⚡</span> Visita Técnica</button>
+      <button class="fab-item fab-item-sec" type="button" onclick="_fabAction('mant')"><span>🔧</span> Programar Mantenimiento</button>
+      <button class="fab-item fab-item-sec" type="button" onclick="_fabAction('qr')"><span>📷</span> Escanear QR</button>
+      <button class="fab-item fab-item-sec" type="button" onclick="_fabAction('fallas')"><span>🔧</span> Referencia Fallas</button>
+      <button class="fab-item fab-item-sec" type="button" onclick="_fabAction('recibo')"><span>🧾</span> Recibo de Pago</button>
+    </div>
+  </div>
+
+  <!-- Toast container -->
+  <div id="toast-container"></div>
+
+  <!-- ═══════════════════════════════
+       MODALES — ING
+       ═══════════════════════════════ -->
+  <div id="modal-ing" class="modal">
+    <div class="modal-header">
+      <button class="modal-close" type="button" onclick="cerrarFormularioING()" aria-label="Cerrar">×</button>
+      <div class="modal-title">📥 NUEVO INGRESO</div>
+      <div class="modal-numero" id="ing-numero-preview">ING-00001</div>
+    </div>
+    <div class="modal-body" id="modal-ing-body"></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" type="button" onclick="cerrarFormularioING()">Cancelar</button>
+      <button class="btn btn-primary" type="button" onclick="guardarIngreso()">💾 GUARDAR</button>
+    </div>
+  </div>
+
+  <div id="modal-ing-ok" class="modal">
+    <div class="modal-header">
+      <button class="modal-close" type="button" onclick="document.getElementById('modal-ing-ok').classList.remove('active')" aria-label="Cerrar">×</button>
+      <div class="modal-title">✅ INGRESO REGISTRADO</div>
+    </div>
+    <div class="modal-body" id="modal-ing-ok-body"></div>
+    <div class="modal-footer">
+      <button class="btn btn-success btn-block btn-lg" type="button" onclick="crearOTTdesdeINGActual()">🔧 Crear OTT desde este ingreso</button>
+      <button class="btn btn-ghost btn-block" type="button" onclick="document.getElementById('modal-ing-ok').classList.remove('active')">Cerrar</button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════
+       MODAL — GARANTÍAS POR VENCER
+       ═══════════════════════════════ -->
+  <div id="modal-garantias" class="modal">
+    <div class="modal-header">
+      <button class="modal-close" type="button" onclick="document.getElementById('modal-garantias').classList.remove('active')" aria-label="Cerrar">×</button>
+      <div class="modal-title">🛡️ Garantías por vencer</div>
+    </div>
+    <div class="modal-body" id="modal-garantias-body"></div>
+  </div>
+
+  <!-- ═══════════════════════════════
+       MODAL — CONFIRMACIÓN GENÉRICA
+       ═══════════════════════════════ -->
+  <div id="modal-confirmar" class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-confirmar-titulo">Confirmar</div>
+    </div>
+    <div class="modal-body">
+      <div id="modal-confirmar-msg" style="white-space:pre-line;line-height:1.5;"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-danger btn-block" type="button" id="modal-confirmar-ok">Confirmar</button>
+      <button class="btn btn-ghost btn-block" type="button" onclick="window._resolverConfirmar?.(false)">Cancelar</button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════
+       MODAL — COBRO AL ENTREGAR
+       ═══════════════════════════════ -->
+  <div id="modal-cobro-entrega" class="modal">
+    <div class="modal-header">
+      <button class="modal-close" type="button" onclick="cerrarCobroEntrega()" aria-label="Cerrar">×</button>
+      <div class="modal-title">💵 ¿Cuánto cobraste?</div>
+    </div>
+    <div class="modal-body" id="modal-cobro-entrega-body"></div>
+    <div class="modal-footer">
+      <button class="btn btn-success btn-block btn-lg" type="button" onclick="confirmarCobroEntrega('todo')">✓ Cobré todo el saldo</button>
+      <button class="btn btn-primary btn-block" type="button" onclick="confirmarCobroEntrega('parte')">➗ Cobré una parte</button>
+      <button class="btn btn-ghost btn-block" type="button" onclick="confirmarCobroEntrega('nada')">○ No cobré nada (queda pendiente)</button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════
+       MODAL — OTT
+       ═══════════════════════════════ -->
+  <div id="modal-ott" class="modal">
+    <div class="modal-header">
+      <button class="modal-close" type="button" onclick="cerrarFormularioOTT()" aria-label="Cerrar">×</button>
+      <div class="modal-title">🔧 OT TALLER</div>
+      <div class="modal-numero" id="ott-numero-preview">OTT-00001</div>
+    </div>
+    <div class="modal-body" id="modal-ott-body">
+
+    <!-- Si vino de un ING → indicador visible -->
+    <div id="ott-from-ing-banner" class="card hide" style="border-color: var(--acento); background: rgba(232,160,32,0.08);">
+      <div class="row gap-4">
+        <span class="txt-xl">🔗</span>
+        <div class="flex-1">
+          <div class="bold acento">Heredado de ingreso</div>
+          <div class="dim txt-sm">Cliente, equipo y datos de encomienda precargados desde <span class="mono" id="ott-from-ing-num">ING-XXXXX</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CLIENTE -->
+    <div class="card">
+      <div class="card-title">👤 Cliente</div>
+      <div id="ott-cliente-autocomplete-wrap" class="field">
+        <label class="field-label">Nombre / Razón Social *</label>
+        <input type="text" id="ott-cliente-nombre" placeholder="Buscá un cliente o escribí uno nuevo" autocomplete="off">
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label class="field-label">CUIT / DNI</label>
+          <input type="text" id="ott-cliente-cuit" placeholder="20-12345678-9" inputmode="numeric">
+        </div>
+        <div class="field">
+          <label class="field-label">Teléfono</label>
+          <input type="text" id="ott-cliente-tel" placeholder="2944-555111" inputmode="tel">
+        </div>
+      </div>
+      <div class="field">
+        <label class="field-label">Ciudad</label>
+        <input type="text" id="ott-cliente-ciudad">
+      </div>
+      <details class="form-mas-opciones">
+        <summary>➕ Datos de domicilio (opcional)</summary>
+        <div class="field">
+          <label class="field-label">Dirección</label>
+          <input type="text" id="ott-cliente-dir" placeholder="Calle 123">
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label class="field-label">CP</label>
+            <input type="text" id="ott-cliente-cp" inputmode="numeric">
+          </div>
+          <div class="field">
+            <label class="field-label">Provincia</label>
+            <input type="text" id="ott-cliente-provincia">
+          </div>
+        </div>
+      </details>
+    </div>
+
+    <!-- EQUIPO -->
+    <div class="card">
+      <div class="card-title">🔧 Equipo</div>
+      <div class="field">
+        <label class="field-label">Tipo de equipo *</label>
+        <select id="ott-equipo-tipo">
+          <option value="Soldadora Inverter">Soldadora Inverter</option>
+          <option value="Monopatín Eléctrico">Monopatín Eléctrico</option>
+          <option value="Máquina Gym">Máquina Gym</option>
+          <option value="Cinta de Correr">Cinta de Correr</option>
+          <option value="Máquina Eléctrica">Máquina Eléctrica</option>
+        </select>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label class="field-label">Marca</label>
+          <input type="text" id="ott-equipo-marca">
+        </div>
+        <div class="field">
+          <label class="field-label">Modelo</label>
+          <input type="text" id="ott-equipo-modelo">
+        </div>
+      </div>
+      <div class="field">
+        <label class="field-label">Falla declarada por el cliente</label>
+        <textarea id="ott-falla" rows="2" placeholder="Descripción del problema según el cliente"></textarea>
+      </div>
+      <div class="field">
+        <label class="field-label">Código de error declarado</label>
+        <input type="text" id="ott-error" placeholder="E-04, F-1, etc.">
+      </div>
+      <div class="field hide" id="ott-numIngreso-wrap">
+        <label class="field-label">Ingreso vinculado</label>
+        <input type="text" id="ott-numIngreso" readonly>
+      </div>
+    </div>
+
+    <!-- DIAGNÓSTICO -->
+    <div class="card">
+      <div class="card-title">🔍 Diagnóstico</div>
+      <div class="dim txt-sm mb-6">Lo que encontraste al revisar el equipo. Cada ítem en una línea aparte.</div>
+      <div id="ott-diag-items"></div>
+      <button class="btn btn-ghost btn-sm" type="button" onclick="_addItem('ott-diag-items', 'item-diag', 2)">+ Agregar ítem de diagnóstico</button>
+      <input type="hidden" id="ott-diagnostico">
+    </div>
+
+    <!-- TRABAJO A REALIZAR -->
+    <div class="card">
+      <div class="card-title">🛠️ Trabajo a realizar</div>
+      <div class="dim txt-sm mb-6">Lo que vas a hacer para solucionar el problema.</div>
+      <div id="ott-trabajo-items"></div>
+      <button class="btn btn-ghost btn-sm" type="button" onclick="_addItem('ott-trabajo-items', 'item-trabajo', 2)">+ Agregar ítem de trabajo</button>
+      <input type="hidden" id="ott-trabajo">
+    </div>
+
+    <!-- PRESUPUESTO -->
+    <div class="card">
+      <div class="card-title">💰 Presupuesto</div>
+      <div class="field">
+        <label class="field-label">Total $</label>
+        <input type="number" id="ott-total" min="0" step="500" inputmode="numeric" oninput="_recalcularSaldoOTT()">
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label class="field-label">Adelanto %</label>
+          <input type="number" id="ott-adelanto-pct" min="0" max="100" step="5" placeholder="50" oninput="_recalcularSaldoOTT('pct')">
+        </div>
+        <div class="field">
+          <label class="field-label">Adelanto $ (referencia)</label>
+          <input type="number" id="ott-adelanto-monto" min="0" step="500" oninput="_recalcularSaldoOTT('monto')">
+        </div>
+      </div>
+      <div class="field">
+        <label class="field-label">Saldo a cobrar (calculado)</label>
+        <input type="text" id="ott-saldo" readonly class="mono" value="$0,00">
+      </div>
+      <div class="dim txt-sm">El adelanto del formulario es <span class="bold">solo informativo</span>. Para que cuente como pago real, registralo desde el botón "Registrar Pago" en el detalle de la orden.</div>
+      <div class="divider"></div>
+      <div class="field-row">
+        <div class="field">
+          <label class="field-label">Garantía</label>
+          <input type="text" id="ott-garantia" placeholder="3 meses">
+        </div>
+        <div class="field">
+          <label class="field-label">Tiempo estimado</label>
+          <input type="text" id="ott-tiempo" placeholder="3-5 días">
+        </div>
+      </div>
+    </div>
+
+    <!-- LOGÍSTICA DE ENVÍO -->
+    <div class="card">
+      <div class="card-title">📦 Logística de envío</div>
+      <div class="field">
+        <label class="field-label">Estado actual</label>
+        <select id="ott-estado" onchange="_onEstadoOTTChange()">
+          <option value="ingresado">Ingresado</option>
+          <option value="retirado_sin_reparar">Retirado sin reparar</option>
+          <option value="en_diagnostico">En diagnóstico</option>
+          <option value="presupuesto_enviado">Presupuesto enviado</option>
+          <option value="aprobado">Aprobado</option>
+          <option value="espera_componentes">Espera de componentes</option>
+          <option value="en_reparacion">En reparación</option>
+          <option value="reparado">Reparado</option>
+          <option value="listo_para_retirar">Listo para retirar</option>
+          <option value="prep_envio">Preparando envío</option>
+          <option value="enviado">Enviado</option>
+          <option value="entregado">Entregado</option>
+          <option value="rechazada_entregada">Rechazada (entregada)</option>
+          <option value="pendiente_pago">Pendiente de pago</option>
+          <option value="pendiente_saldo">Pendiente de saldo</option>
+          <option value="pagado">Pagado</option>
+        </select>
+      </div>
+
+      <!-- Datos heredados desde ING (entrada) -->
+      <div id="ott-entrada-fields" class="hide">
+        <div class="divider"></div>
+        <div class="field-label mb-4 acento">DATOS DE ENCOMIENDA DE ENTRADA</div>
+        <div class="dim txt-sm mb-6">Heredados del ingreso, no editables aquí.</div>
+        <div class="field-row">
+          <div class="field">
+            <label class="field-label">Transporte entrada</label>
+            <input type="text" id="ott-ent-transporte" readonly>
+          </div>
+          <div class="field">
+            <label class="field-label">Guía entrada</label>
+            <input type="text" id="ott-ent-guia" readonly>
+          </div>
+        </div>
+        <div class="field">
+          <label class="field-label">Costo envío entrada $</label>
+          <input type="text" id="ott-ent-costo" readonly class="mono">
+        </div>
+      </div>
+
+      <!-- Logística de retorno (se habilita en estado prep_envio o posteriores) -->
+      <div id="ott-retorno-fields" class="hide">
+        <div class="divider"></div>
+        <div class="field-label mb-4 acento">LOGÍSTICA DE RETORNO</div>
+        <div class="field-row">
+          <div class="field">
+            <label class="field-label">Transporte</label>
+            <input type="text" id="ott-ret-transporte" placeholder="Andesmar, Vía Cargo, etc.">
+          </div>
+          <div class="field">
+            <label class="field-label">N° guía</label>
+            <input type="text" id="ott-ret-guia">
+          </div>
+        </div>
+        <div class="field">
+          <label class="field-label">Costo envío retorno $</label>
+          <input type="number" id="ott-ret-costo" min="0" step="100" inputmode="numeric">
+        </div>
+      </div>
+    </div>
+
+    <!-- FECHA + BASE -->
+    <div class="card">
+      <div class="card-title">📅 Datos generales</div>
+      <div class="field-row">
+        <div class="field">
+          <label class="field-label">Fecha</label>
+          <input type="date" id="ott-fecha">
+        </div>
+        <div class="field">
+          <label class="field-label">Ciudad / zona del trabajo</label>
+          <input type="text" id="ott-zona" list="zonas-datalist-global" placeholder="Ciudad del trabajo (ej: Neuquén)">
+          <input type="hidden" id="ott-base" value="SMA">
+        </div>
+      </div>
+    </div>
+
+  </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" type="button" onclick="cerrarFormularioOTT()">Cancelar</button>
+      <button class="btn btn-primary" type="button" onclick="guardarOTT()">💾 GUARDAR</button>
+    </div>
+  </div>
+
+  <div id="modal-ott-ok" class="modal">
+    <div class="modal-header">
+      <button class="modal-close" type="button" onclick="document.getElementById('modal-ott-ok').classList.remove('active')" aria-label="Cerrar">×</button>
+      <div class="modal-title">✅ OTT GUARDADA</div>
+    </div>
+    <div class="modal-body" id="modal-ott-ok-body"></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost btn-block" type="button" onclick="document.getElementById('modal-ott-ok').classList.remove('active')">Cerrar</button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════
+       MODAL — OTE
+       ═══════════════════════════════ -->
+  <div id="modal-ote" class="modal">
+    <div class="modal-header">
+      <button class="modal-close" type="button" onclick="cerrarFormularioOTE()" aria-label="Cerrar">×</button>
+      <div class="modal-title">🚐 OT EXTERIOR</div>
+      <div class="modal-numero" id="ote-numero-preview">OTE-00001</div>
+    </div>
+    <div id="ote-from-pre-banner" class="from-pre-banner hide">
+      📝 Cargado desde PRE: <span id="ote-from-pre-num"></span>
+    </div>
+    <div class="modal-body" id="modal-ote-body">
+
+    <!-- 👤 CLIENTE -->
+    <div class="card">
+      <div class="card-title">👤 CLIENTE</div>
+      <div class="field">
+        <label class="field-label">Nombre / Razón Social *</label>
+        <input type="text" id="ote-cliente-nombre" autocomplete="off" placeholder="Buscar o escribir...">
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label class="field-label">CUIT/DNI</label>
+          <input type="text" id="ote-cliente-cuit" placeholder="Sin guiones">
+        </div>
+        <div class="field">
+          <label class="field-label">Teléfono</label>
+          <input type="tel" id="ote-cliente-tel" placeholder="Cel/fijo">
+        </div>
+      </div>
+      <div class="field">
+        <label class="field-label">Dirección del servicio</label>
+        <input type="text" id="ote-cliente-dir" placeholder="Calle y altura">
+      </div>
+      <div class="field-row-3">
+        <div class="field">
+          <label class="field-label">CP</label>
+          <input type="text" id="ote-cliente-cp">
+        </div>
+        <div class="field">
+          <label class="field-label">Ciudad</label>
+          <input type="text" id="ote-cliente-ciudad">
+        </div>
+        <div class="field">
+          <label class="field-label">Provincia</label>
+          <input type="text" id="ote-cliente-provincia">
+        </div>
+      </div>
+    </div>
+
+    <!-- 🔧 SERVICIO -->
+    <div class="card">
+      <div class="card-title">🔧 SERVICIO</div>
+      <div class="field-row">
+        <div class="field">
+          <label class="field-label">Tipo de servicio *</label>
+          <select id="ote-tipo-servicio">
+            <option value="">— Elegir —</option>
+            <option value="Visita técnica">Visita técnica</option>
+            <option value="Soldadora Inverter">Soldadora Inverter</option>
+            <option value="Monopatín Eléctrico">Monopatín Eléctrico</option>
+            <option value="Máquina Gym">Máquina Gym</option>
+            <option value="Cinta de Correr">Cinta de Correr</option>
+            <option value="Máquina Eléctrica">Máquina Eléctrica</option>
+            <option value="Servicio de Urgencia">Servicio de Urgencia</option>
+            <option value="Instalaciones Eléctricas">Instalaciones Eléctricas</option>
+            <option value="Mantenimiento">Mantenimiento</option>
+            <option value="Mantenimiento programado">Mantenimiento programado</option>
+            <option value="Asesoramiento">Asesoramiento</option>
+            <option value="Otro">Otro</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="field-label">Ciudad / zona del trabajo</label>
+          <input type="text" id="ote-zona" list="zonas-datalist-global" placeholder="Ciudad del trabajo (ej: Neuquén)">
+          <input type="hidden" id="ote-base" value="SMA">
+        </div>
+      </div>
+      <div class="field">
+        <label class="field-label">Fecha</label>
+        <input type="date" id="ote-fecha">
+      </div>
+      <div class="field">
+        <label class="field-label">N° Presupuesto vinculado (si aplica)</label>
+        <input type="text" id="ote-numPresupuesto" readonly placeholder="Se completa si la OTE viene desde un PRE">
+      </div>
+    </div>
+
+    <!-- 🔧 EQUIPO -->
+    <div class="card">
+      <div class="card-title">🔧 Equipo</div>
+      <div class="dim txt-sm mb-6">Datos del equipo intervenido (si aplica).</div>
+      <div class="field-row">
+        <div class="field">
+          <label class="field-label">Marca</label>
+          <input type="text" id="ote-equipo-marca">
+        </div>
+        <div class="field">
+          <label class="field-label">Modelo</label>
+          <input type="text" id="ote-equipo-modelo">
+        </div>
+      </div>
+      <div class="field">
+        <label class="field-label">Falla declarada por el cliente</label>
+        <textarea id="ote-falla" rows="2" placeholder="Descripción del problema según el cliente"></textarea>
+      </div>
+      <div class="field">
+        <label class="field-label">Código de error declarado</label>
+        <input type="text" id="ote-error" placeholder="E-04, F-1, etc.">
+      </div>
+    </div>
+
+    <!-- 📋 DESCRIPCIÓN DEL SERVICIO -->
+    <div class="card">
+      <div class="card-title">📋 DESCRIPCIÓN DEL SERVICIO</div>
+      <div class="dim txt-sm mb-6">Describí el servicio solicitado. Cada ítem aparece con bullet ● en el PDF.</div>
+      <div id="ote-desc-items">
+        <div class="item-row">
+          <span class="item-bullet">●</span>
+          <textarea rows="2" class="ote-desc-item" placeholder="Descripción del servicio a realizar..."></textarea>
+          <button class="item-remove" type="button" onclick="_removeItem(this)">×</button>
+        </div>
+      </div>
+      <button class="btn btn-ghost btn-sm" type="button" onclick="_addItem('ote-desc-items','ote-desc-item',2)">+ Agregar ítem</button>
+      <input type="hidden" id="ote-desc-servicio">
+    </div>
+
+    <!-- 🔨 TRABAJO REALIZADO (tabular) -->
+    <div class="card">
+      <div class="card-title">🔨 TRABAJO REALIZADO</div>
+      <div class="dim txt-sm mb-6">Cargá cada ítem con cantidad / detalle / precio unitario. El subtotal se calcula solo.</div>
+      <div id="ote-trabajo-list"></div>
+      <button class="btn btn-ghost btn-sm" type="button" onclick="_addTrabajoOTE()">+ Agregar ítem</button>
+      <div class="row-sb mt-8" style="padding:8px 4px;background:var(--surface-2);border-radius:var(--r-sm);">
+        <span class="bold">Subtotal trabajo:</span>
+        <span class="bold acento mono" id="ote-trabajo-subtotal">$0,00</span>
+      </div>
+    </div>
+
+    <!-- 🛒 MATERIALES (tabular opcional) -->
+    <div class="card">
+      <div class="card-title">🛒 MATERIALES USADOS</div>
+      <div class="dim txt-sm mb-6">Materiales que aportó el técnico. Suman al total.</div>
+      <div id="ote-materiales-list"></div>
+      <button class="btn btn-ghost btn-sm" type="button" onclick="_addMaterialOTE()">+ Agregar material</button>
+      <div class="row-sb mt-8" style="padding:8px 4px;background:var(--surface-2);border-radius:var(--r-sm);">
+        <span class="bold">Subtotal materiales:</span>
+        <span class="bold acento mono" id="ote-materiales-subtotal">$0,00</span>
+      </div>
+    </div>
+
+    <!-- 💰 COSTOS -->
+    <div class="card">
+      <div class="card-title">💰 COSTOS</div>
+      <div class="field-row">
+        <div class="field">
+          <label class="field-label">Mano de obra extra ($)</label>
+          <input type="number" id="ote-mano-obra" step="0.01" min="0" value="0" oninput="_recalcOTETotal()">
+        </div>
+        <div class="field">
+          <label class="field-label">Viático cobrado al cliente ($)</label>
+          <input type="number" id="ote-viatico" step="0.01" min="0" value="0" oninput="_recalcOTETotal()">
+        </div>
+      </div>
+      <div class="row-sb mt-6" style="padding:14px;background:linear-gradient(135deg,var(--acento) 0%,var(--acento-2) 100%);color:#1a1a1a;border-radius:var(--r-sm);">
+        <span class="bold" style="font-size:14px;">TOTAL GENERAL:</span>
+        <span class="bold mono" style="font-size:20px;" id="ote-total-display">$0,00</span>
+      </div>
+      <input type="hidden" id="ote-total" value="0">
+    </div>
+
+    <!-- 💸 GASTOS INTERNOS -->
+    <div class="card" style="border-color:rgba(255,200,80,0.3);background:rgba(255,200,80,0.04);">
+      <div class="card-title">💸 GASTOS INTERNOS DEL TÉCNICO</div>
+      <div class="dim txt-sm mb-6">No aparecen en el PDF del cliente. Se registran como viáticos en finanzas.</div>
+      <div class="field-row-3">
+        <div class="field">
+          <label class="field-label">Vianda ($)</label>
+          <input type="number" id="ote-gasto-vianda" step="0.01" min="0" value="0">
+        </div>
+        <div class="field">
+          <label class="field-label">Movilidad ($)</label>
+          <input type="number" id="ote-gasto-movilidad" step="0.01" min="0" value="0">
+        </div>
+        <div class="field">
+          <label class="field-label">Otros ($)</label>
+          <input type="number" id="ote-gasto-otros" step="0.01" min="0" value="0">
+        </div>
+      </div>
+    </div>
+
+    <!-- 📊 ESTADO -->
+    <div class="card">
+      <div class="card-title">📊 ESTADO DE PAGO</div>
+      <div class="field">
+        <select id="ote-estado">
+          <option value="pendiente_pago">Pendiente de pago</option>
+          <option value="pendiente_saldo">Pendiente de saldo</option>
+          <option value="pagado">Pagado</option>
+        </select>
+      </div>
+    </div>
+
+  </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" type="button" onclick="cerrarFormularioOTE()">Cancelar</button>
+      <button class="btn btn-primary" type="button" onclick="guardarOTE()">✓ GUARDAR</button>
+    </div>
+  </div>
+
+  <div id="modal-ote-ok" class="modal">
+    <div class="modal-header">
+      <button class="modal-close" type="button" onclick="document.getElementById('modal-ote-ok').classList.remove('active')" aria-label="Cerrar">×</button>
+      <div class="modal-title">✅ OTE GUARDADA</div>
+    </div>
+    <div class="modal-body" id="modal-ote-ok-body"></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost btn-block" type="button" onclick="document.getElementById('modal-ote-ok').classList.remove('active')">Cerrar</button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════
+       MODAL — PRE
+       ═══════════════════════════════ -->
+  <div id="modal-pre" class="modal">
+    <div class="modal-header">
+      <button class="modal-close" type="button" onclick="cerrarFormularioPRE()" aria-label="Cerrar">×</button>
+      <div class="modal-title">📝 NUEVO PRESUPUESTO</div>
+      <div class="modal-numero" id="pre-numero-preview">PRE-00001</div>
+    </div>
+    <div class="modal-body" id="modal-pre-body">
+
+    <!-- 👤 CLIENTE -->
+    <div class="card">
+      <div class="card-title">👤 CLIENTE</div>
+      <div class="field">
+        <label class="field-label">Nombre / Razón Social *</label>
+        <input type="text" id="pre-cliente-nombre" autocomplete="off" placeholder="Buscar o escribir...">
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label class="field-label">CUIT/DNI</label>
+          <input type="text" id="pre-cliente-cuit" placeholder="Sin guiones">
+        </div>
+        <div class="field">
+          <label class="field-label">Teléfono</label>
+          <input type="tel" id="pre-cliente-tel" placeholder="Cel/fijo">
+        </div>
+      </div>
+      <div class="field">
+        <label class="field-label">Dirección</label>
+        <input type="text" id="pre-cliente-dir">
+      </div>
+      <div class="field-row-3">
+        <div class="field">
+          <label class="field-label">CP</label>
+          <input type="text" id="pre-cliente-cp">
+        </div>
+        <div class="field">
+          <label class="field-label">Ciudad</label>
+          <input type="text" id="pre-cliente-ciudad">
+        </div>
+        <div class="field">
+          <label class="field-label">Provincia</label>
+          <input type="text" id="pre-cliente-provincia">
+        </div>
+      </div>
+    </div>
+
+    <!-- 🔧 SERVICIO -->
+    <div class="card">
+      <div class="card-title">🔧 SERVICIO / EQUIPO</div>
+      <div class="field-row">
+        <div class="field">
+          <label class="field-label">Tipo *</label>
+          <select id="pre-tipo-servicio">
+            <option value="">— Elegir —</option>
+            <option value="Soldadora Inverter">Soldadora Inverter</option>
+            <option value="Monopatín Eléctrico">Monopatín Eléctrico</option>
+            <option value="Máquina Gym">Máquina Gym</option>
+            <option value="Cinta de Correr">Cinta de Correr</option>
+            <option value="Máquina Eléctrica">Máquina Eléctrica</option>
+            <option value="Servicio de Urgencia">Servicio de Urgencia</option>
+            <option value="Instalaciones Eléctricas">Instalaciones Eléctricas</option>
+            <option value="Mantenimiento">Mantenimiento</option>
+            <option value="Asesoramiento">Asesoramiento</option>
+            <option value="Otro">Otro</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="field-label">Ciudad / zona del trabajo</label>
+          <input type="text" id="pre-zona" list="zonas-datalist-global" placeholder="Ciudad del trabajo (ej: Neuquén)">
+          <input type="hidden" id="pre-base" value="SMA">
+        </div>
+      </div>
+      <div class="field">
+        <label class="field-label">Modelo / Equipo</label>
+        <input type="text" id="pre-equipo-modelo" placeholder="Marca y modelo del equipo (opcional)">
+      </div>
+      <div class="field">
+        <label class="field-label">Problema declarado</label>
+        <textarea id="pre-problema" rows="2" placeholder="Descripción breve del problema..."></textarea>
+      </div>
+      <div class="field">
+        <label class="field-label">Fecha</label>
+        <input type="date" id="pre-fecha">
+      </div>
+    </div>
+
+    <!-- 📋 DESCRIPCIÓN -->
+    <div class="card">
+      <div class="card-title">📋 DESCRIPCIÓN DEL TRABAJO</div>
+      <div class="dim txt-sm mb-6">Texto descriptivo del trabajo presupuestado. Cada ítem aparece con bullet ●.</div>
+      <div id="pre-desc-items">
+        <div class="item-row">
+          <span class="item-bullet">●</span>
+          <textarea rows="2" class="pre-desc-item" placeholder="Descripción..."></textarea>
+          <button class="item-remove" type="button" onclick="_removeItem(this)">×</button>
+        </div>
+      </div>
+      <button class="btn btn-ghost btn-sm" type="button" onclick="_addItem('pre-desc-items','pre-desc-item',2)">+ Agregar ítem</button>
+      <input type="hidden" id="pre-descripcion">
+    </div>
+
+    <!-- 🔨 TRABAJO PRESUPUESTADO (tabular) -->
+    <div class="card">
+      <div class="card-title">🔨 TRABAJO PRESUPUESTADO</div>
+      <div class="dim txt-sm mb-6">Cargá cada ítem con cantidad / detalle / precio unitario.</div>
+      <div id="pre-trabajo-list"></div>
+      <button class="btn btn-ghost btn-sm" type="button" onclick="_addTrabajoPRE()">+ Agregar ítem</button>
+      <div class="row-sb mt-8" style="padding:8px 4px;background:var(--surface-2);border-radius:var(--r-sm);">
+        <span class="bold">Subtotal trabajo:</span>
+        <span class="bold acento mono" id="pre-trabajo-subtotal">$0,00</span>
+      </div>
+    </div>
+
+    <!-- 🛒 MATERIALES COTIZADOS (suman al total) -->
+    <div class="card">
+      <div class="card-title">🛒 MATERIALES COTIZADOS</div>
+      <div class="dim txt-sm mb-6">Materiales que provee el técnico. Suman al total del presupuesto.</div>
+      <div id="pre-materiales-list"></div>
+      <button class="btn btn-ghost btn-sm" type="button" onclick="_addMaterialPRE()">+ Agregar material</button>
+      <div class="row-sb mt-8" style="padding:8px 4px;background:var(--surface-2);border-radius:var(--r-sm);">
+        <span class="bold">Subtotal materiales:</span>
+        <span class="bold acento mono" id="pre-materiales-subtotal">$0,00</span>
+      </div>
+    </div>
+
+    <!-- 💰 COSTOS -->
+    <div class="card">
+      <div class="card-title">💰 COSTOS</div>
+      <div class="field-row">
+        <div class="field">
+          <label class="field-label">Mano de obra extra ($)</label>
+          <input type="number" id="pre-mano-obra" step="0.01" min="0" value="0" oninput="_recalcPRETotal()">
+        </div>
+        <div class="field">
+          <label class="field-label">Viático ($)</label>
+          <input type="number" id="pre-viatico" step="0.01" min="0" value="0" oninput="_recalcPRETotal()">
+        </div>
+      </div>
+      <div class="row-sb mt-6" style="padding:14px;background:linear-gradient(135deg,var(--acento) 0%,var(--acento-2) 100%);color:#1a1a1a;border-radius:var(--r-sm);">
+        <span class="bold" style="font-size:14px;">TOTAL GENERAL:</span>
+        <span class="bold mono" style="font-size:20px;" id="pre-total-display">$0,00</span>
+      </div>
+      <input type="hidden" id="pre-total" value="0">
+    </div>
+
+    <!-- 🛍️ MATERIALES A COMPRAR POR EL CLIENTE -->
+    <div class="card" style="border-color:rgba(76,175,125,0.3);background:rgba(76,175,125,0.04);">
+      <div class="card-title">🛍️ MATERIALES A COMPRAR POR EL CLIENTE</div>
+      <div class="dim txt-sm mb-6">Lista opcional con materiales que el cliente debe conseguir. Se imprime en hoja aparte.</div>
+      <div id="pre-materiales-cliente-list"></div>
+      <button class="btn btn-ghost btn-sm" type="button" onclick="_addMaterialClientePRE()">+ Agregar material</button>
+      <div class="field mt-8">
+        <label class="field-label">NOTA IMPORTANTE</label>
+        <textarea id="pre-nota-importante" rows="3" placeholder="Aclaraciones para el cliente sobre los materiales (marca recomendada, dónde comprarlos, etc.)"></textarea>
+      </div>
+    </div>
+
+    <!-- ⏱️ CONDICIONES DEL PRESUPUESTO -->
+    <div class="card">
+      <div class="card-title">⏱️ CONDICIONES</div>
+      <div class="field-row">
+        <div class="field">
+          <label class="field-label">Garantía</label>
+          <input type="text" id="pre-garantia" placeholder="Ej: 30 días" value="30 días">
+        </div>
+        <div class="field">
+          <label class="field-label">Tiempo estimado</label>
+          <input type="text" id="pre-tiempo" placeholder="Ej: 5 días">
+        </div>
+      </div>
+      <div class="field">
+        <label class="field-label">Validez del presupuesto (días)</label>
+        <input type="number" id="pre-vigencia" value="10" min="1" max="365">
+      </div>
+    </div>
+
+    <!-- 📊 ESTADO -->
+    <div class="card">
+      <div class="card-title">📊 ESTADO</div>
+      <div class="field">
+        <select id="pre-estado">
+          <option value="pendiente">Pendiente de aprobación</option>
+          <option value="aprobado">Aprobado</option>
+          <option value="rechazado">Rechazado</option>
+        </select>
+      </div>
+    </div>
+
+  </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" type="button" onclick="cerrarFormularioPRE()">Cancelar</button>
+      <button class="btn btn-primary" type="button" onclick="guardarPRE()">✓ GUARDAR</button>
+    </div>
+  </div>
+
+  <div id="modal-pre-ok" class="modal">
+    <div class="modal-header">
+      <button class="modal-close" type="button" onclick="document.getElementById('modal-pre-ok').classList.remove('active')" aria-label="Cerrar">×</button>
+      <div class="modal-title">✅ PRE GUARDADO</div>
+    </div>
+    <div class="modal-body" id="modal-pre-ok-body"></div>
+    <div class="modal-footer">
+      <button class="btn btn-success btn-block btn-lg" type="button" onclick="crearOTEdesdePREActual()">🚐 Crear OTE desde este presupuesto</button>
+      <button class="btn btn-ghost btn-block" type="button" onclick="document.getElementById('modal-pre-ok').classList.remove('active')">Cerrar</button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════
+       MODAL — PAGO PARCIAL
+       ═══════════════════════════════ -->
+  <div id="modal-pago-parcial" class="modal">
+    <div class="modal-header">
+      <button class="modal-close" type="button" onclick="cerrarPagoParcial()" aria-label="Cerrar">×</button>
+      <div class="modal-title">💵 REGISTRAR PAGO</div>
+    </div>
+    <div class="modal-body">
+      <div class="card">
+        <div class="row-sb"><span class="dim txt-sm">Orden</span><span class="bold mono" id="pago-numero">—</span></div>
+        <div class="row-sb"><span class="dim txt-sm">Cliente</span><span id="pago-cliente">—</span></div>
+        <div class="divider"></div>
+        <div class="row-sb"><span class="dim txt-sm">Total</span><span class="bold" id="pago-total">$0,00</span></div>
+        <div class="row-sb"><span class="dim txt-sm">Pagado</span><span class="exito" id="pago-pagado">$0,00</span></div>
+        <div class="row-sb"><span class="dim txt-sm">Saldo</span><span class="acento bold" id="pago-saldo">$0,00</span></div>
+      </div>
+      <div class="field">
+        <label class="field-label">Monto a registrar *</label>
+        <input type="number" id="pago-monto" placeholder="0" min="0" step="0.01">
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label class="field-label">Método de pago</label>
+          <select id="pago-metodo">
+            <option value="efectivo">Efectivo</option>
+            <option value="transferencia">Transferencia</option>
+            <option value="debito">Tarjeta débito</option>
+            <option value="credito">Tarjeta crédito</option>
+            <option value="mercadopago">Mercado Pago</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="field-label">Fecha</label>
+          <input type="date" id="pago-fecha">
+        </div>
+      </div>
+      <div class="field">
+        <label class="field-label">Nota (opcional)</label>
+        <input type="text" id="pago-nota" placeholder="Anticipo, seña, saldo...">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" type="button" onclick="cerrarPagoParcial()">Cancelar</button>
+      <button class="btn btn-success" type="button" onclick="confirmarPagoParcial()">✓ REGISTRAR</button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════
+       MODAL — DETALLE UNIVERSAL
+       ═══════════════════════════════ -->
+  <div id="modal-detalle" class="modal">
+    <div class="modal-header">
+      <button class="modal-close" type="button" onclick="cerrarModalDetalle()" aria-label="Cerrar">×</button>
+      <div class="modal-title" id="detalle-titulo">Detalle</div>
+    </div>
+    <div class="modal-body" id="modal-detalle-body"></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" type="button" onclick="cerrarModalDetalle()">Cerrar</button>
+      <button class="btn btn-primary" type="button" id="btn-detalle-guardar" onclick="guardarCambiosDetalle()">💾 Guardar cambios</button>
+    </div>
+  </div>
+
+  <!-- MODAL — Checklist de mantenimiento -->
+  <div id="modal-checklist" class="modal">
+    <div class="modal-header">
+      <button class="modal-close" type="button" onclick="cerrarChecklist()" aria-label="Cerrar">×</button>
+      <div class="modal-title">🏋️ Checklist — <span id="checklist-cliente"></span></div>
+    </div>
+    <div class="modal-body">
+      <div class="dim txt-sm mb-6">Tildá cada máquina a la que le hiciste el service y marcá su estado. Al finalizar se genera la constancia en PDF.</div>
+      <div id="checklist-lista"></div>
+      <div class="resumen-ote" id="checklist-resumen" style="background:var(--surface); border:1px solid var(--acento); border-radius:10px; padding:12px; margin-top:14px; font-size:13px;"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost btn-block" type="button" onclick="cerrarChecklist()">Cancelar</button>
+      <button class="btn btn-primary btn-block" type="button" onclick="_finalizarChecklist()">✓ Generar constancia (PDF)</button>
+    </div>
+  </div>
+
+  <!-- MODAL — Flota de máquinas -->
+  <div id="modal-flota" class="modal">
+    <div class="modal-header">
+      <button class="modal-close" type="button" onclick="cerrarFlota()" aria-label="Cerrar">×</button>
+      <div class="modal-title">🏋️ Máquinas de <span id="flota-cliente-nombre"></span></div>
+    </div>
+    <div class="modal-body">
+      <div class="dim txt-sm mb-6">Cargá cada máquina como un ítem. Así podés hacerle seguimiento individual en cada mantenimiento.</div>
+      <div id="flota-lista"></div>
+      <div class="card" style="margin-top:12px;">
+        <div class="card-title">➕ Agregar máquina</div>
+        <div class="field-row">
+          <div class="field">
+            <label class="field-label">Marca</label>
+            <input type="text" id="flota-marca" placeholder="Ej: Lusqtoff">
+          </div>
+          <div class="field">
+            <label class="field-label">Modelo</label>
+            <input type="text" id="flota-modelo" placeholder="Ej: Trotadora T200">
+          </div>
+        </div>
+        <div class="field">
+          <label class="field-label">N° / Identificación</label>
+          <input type="text" id="flota-numero" placeholder="Ej: GO-01">
+        </div>
+        <button class="btn btn-primary btn-block" type="button" onclick="_addMaquinaFlota()">+ Agregar a la lista</button>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-block" type="button" onclick="cerrarFlota()">Listo</button>
+    </div>
+  </div>
+
+  <!-- MODAL — Alta/edición de Abono -->
+  <div id="modal-abono" class="modal">
+    <div class="modal-header">
+      <button class="modal-close" type="button" onclick="document.getElementById('modal-abono').classList.remove('active')" aria-label="Cerrar">×</button>
+      <div class="modal-title">💳 CLIENTE CON SUSCRIPCIÓN</div>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="abono-id">
+      <div class="card">
+        <div class="card-title">👤 Cliente</div>
+        <div id="abono-cliente-autocomplete-wrap" class="field">
+          <label class="field-label">Nombre / Razón Social *</label>
+          <input type="text" id="abono-cliente-nombre" placeholder="Buscá un cliente o escribí uno nuevo" autocomplete="off">
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label class="field-label">CUIT / DNI</label>
+            <input type="text" id="abono-cliente-cuit" placeholder="20-12345678-9" inputmode="numeric">
+          </div>
+          <div class="field">
+            <label class="field-label">Teléfono</label>
+            <input type="text" id="abono-cliente-tel" placeholder="2944-555111" inputmode="tel">
+          </div>
+        </div>
+        <div class="field">
+          <label class="field-label">Dirección</label>
+          <input type="text" id="abono-cliente-dir" placeholder="Calle 123">
+        </div>
+        <div class="field-row-3">
+          <div class="field">
+            <label class="field-label">CP</label>
+            <input type="text" id="abono-cliente-cp" inputmode="numeric">
+          </div>
+          <div class="field">
+            <label class="field-label">Ciudad</label>
+            <input type="text" id="abono-cliente-ciudad">
+          </div>
+          <div class="field">
+            <label class="field-label">Provincia</label>
+            <input type="text" id="abono-cliente-provincia">
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="field">
+          <label class="field-label">Equipo / máquinas *</label>
+          <input type="text" id="abono-equipo" placeholder="Ej: Gimnasio Olimpo — 6 máquinas">
+        </div>
+        <button class="btn btn-ghost btn-block" type="button" onclick="_abrirFlotaDesdeAbono()" style="margin-bottom:8px;">🏋️ Cargar máquinas (gimnasios/flota)</button>
+        <div class="field">
+          <label class="field-label">Ciudad / zona del trabajo</label>
+          <input type="text" id="abono-zona" list="zonas-datalist-global" placeholder="Ciudad del trabajo">
+        </div>
+      </div>
+      <div class="card">
+        <div class="field-row">
+          <div class="field">
+            <label class="field-label">Cuota *</label>
+            <input type="number" id="abono-cuota" placeholder="0" min="0" step="500" inputmode="numeric">
+          </div>
+          <div class="field">
+            <label class="field-label">Periodicidad</label>
+            <select id="abono-periodicidad">
+              <option value="mensual">Mensual</option>
+              <option value="trimestral">Trimestral</option>
+              <option value="anual">Anual</option>
+            </select>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label class="field-label">Día de cobro</label>
+            <input type="number" id="abono-dia" placeholder="1" min="1" max="31" value="1" inputmode="numeric">
+          </div>
+          <div class="field">
+            <label class="field-label">Cliente desde</label>
+            <input type="date" id="abono-desde">
+          </div>
+        </div>
+        <div class="field">
+          <label class="field-label">¿Qué incluye la suscripción?</label>
+          <input type="text" id="abono-incluye" placeholder="Ej: Service + repuestos básicos">
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost btn-block" type="button" onclick="document.getElementById('modal-abono').classList.remove('active')">Cancelar</button>
+      <button class="btn btn-primary btn-block" type="button" onclick="guardarAbonoUI()">💾 GUARDAR</button>
+    </div>
+  </div>
+
+  <!-- MODAL — Lector QR -->
+  <div id="modal-qr-scanner" class="modal">
+    <div class="modal-header">
+      <button class="modal-close" type="button" onclick="cerrarLectorQR()" aria-label="Cerrar">×</button>
+      <div class="modal-title">📷 ESCANEAR QR DEL EQUIPO</div>
+    </div>
+    <div class="modal-body" style="text-align:center;">
+      <div class="dim txt-sm mb-6">Apuntá la cámara al QR de la etiqueta del equipo.</div>
+      <video id="qr-video" playsinline style="width:100%;max-width:360px;border-radius:12px;background:#000;"></video>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost btn-block" type="button" onclick="cerrarLectorQR()">Cancelar</button>
+    </div>
+  </div>
+
+  <!-- MODAL — Turno -->
+  <div id="modal-turno" class="modal">
+    <div class="modal-header">
+      <button class="modal-close" type="button" onclick="cerrarFormularioTurno()" aria-label="Cerrar">×</button>
+      <div class="modal-title">📅 TURNO</div>
+    </div>
+    <div class="modal-body" id="modal-turno-body"></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" type="button" onclick="cerrarFormularioTurno()">Cancelar</button>
+      <button class="btn btn-primary" type="button" onclick="guardarTurno()">💾 GUARDAR</button>
+    </div>
+  </div>
+
+  <!-- MODAL — Turno feedback -->
+  <div id="modal-turno-feedback" class="modal">
+    <div class="modal-header">
+      <button class="modal-close" type="button" onclick="document.getElementById('modal-turno-feedback').classList.remove('active')" aria-label="Cerrar">×</button>
+      <div class="modal-title">✅ TURNO REALIZADO</div>
+    </div>
+    <div class="modal-body" id="modal-turno-feedback-body"></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" type="button" onclick="document.getElementById('modal-turno-feedback').classList.remove('active')">Cancelar</button>
+      <button class="btn btn-primary" type="button" onclick="confirmarFeedbackTurno()">✓ CONFIRMAR</button>
+    </div>
+  </div>
+
+  <!-- MODAL — Mantenimiento programado -->
+  <div id="modal-mant" class="modal">
+    <div class="modal-header">
+      <button class="modal-close" type="button" onclick="cerrarFormularioMantenimiento()" aria-label="Cerrar">×</button>
+      <div class="modal-title">🔧 MANTENIMIENTO PROGRAMADO</div>
+    </div>
+    <div class="modal-body" id="modal-mant-body">
+      <input type="hidden" id="mant-id">
+      <input type="hidden" id="mant-origen">
+
+      <div class="card">
+        <div class="card-title">👤 Cliente</div>
+        <div id="mant-cliente-autocomplete-wrap" class="field">
+          <label class="field-label">Nombre / Razón Social *</label>
+          <input type="text" id="mant-cliente-nombre" placeholder="Buscá un cliente o escribí uno nuevo" autocomplete="off">
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label class="field-label">CUIT / DNI</label>
+            <input type="text" id="mant-cliente-cuit" placeholder="20-12345678-9" inputmode="numeric">
+          </div>
+          <div class="field">
+            <label class="field-label">Teléfono</label>
+            <input type="text" id="mant-cliente-tel" placeholder="2944-555111" inputmode="tel">
+          </div>
+        </div>
+        <div class="field">
+          <label class="field-label">Dirección</label>
+          <input type="text" id="mant-cliente-dir" placeholder="Calle 123">
+        </div>
+        <div class="field-row-3">
+          <div class="field">
+            <label class="field-label">CP</label>
+            <input type="text" id="mant-cliente-cp" inputmode="numeric">
+          </div>
+          <div class="field">
+            <label class="field-label">Ciudad</label>
+            <input type="text" id="mant-cliente-ciudad">
+          </div>
+          <div class="field">
+            <label class="field-label">Provincia</label>
+            <input type="text" id="mant-cliente-provincia">
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">🔧 Equipo</div>
+        <div class="field">
+          <label class="field-label">Equipo / máquina *</label>
+          <input type="text" id="mant-equipo" placeholder="Ej: Soldadora Esab 240 — o — Gimnasio X (todas las máquinas)">
+          <div class="dim txt-sm" style="margin-top:4px;">Para un solo equipo, poné marca y modelo. Para un gimnasio u obra con varias máquinas, describí el conjunto (ej: "Gimnasio Olimpo — 6 máquinas").</div>
+        </div>
+        <div class="field">
+          <label class="field-label">Ciudad / zona del trabajo</label>
+          <input type="text" id="mant-zona" list="zonas-datalist-global" placeholder="Ciudad del trabajo (ej: Neuquén)">
+          <input type="hidden" id="mant-base" value="SMA">
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">📆 Vencimiento</div>
+        <div class="field">
+          <label class="field-label">Tipo de control</label>
+          <select id="mant-tipo" onchange="_onMantTipoChange()">
+            <option value="fecha">Por fecha (cada X meses)</option>
+            <option value="horas">Por horas de uso</option>
+          </select>
+        </div>
+
+        <div id="mant-bloque-fecha">
+          <div class="field-row">
+            <div class="field">
+              <label class="field-label">Cada cuántos meses</label>
+              <input type="number" id="mant-intervalo-meses" min="1" step="1" placeholder="6" inputmode="numeric" oninput="_recalcMantFecha()">
+            </div>
+            <div class="field">
+              <label class="field-label">Próximo service</label>
+              <input type="date" id="mant-proxima-fecha">
+            </div>
+          </div>
+        </div>
+
+        <div id="mant-bloque-horas" style="display:none;">
+          <div class="field">
+            <label class="field-label">Cada cuántas horas de uso</label>
+            <input type="number" id="mant-intervalo-horas" min="1" step="1" placeholder="100" inputmode="numeric">
+          </div>
+          <div class="field">
+            <label class="field-label">Fecha estimada de aviso (opcional)</label>
+            <input type="date" id="mant-proxima-fecha-horas">
+          </div>
+          <div class="dim txt-sm">Para control por horas, podés poner una fecha estimada de recordatorio.</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">📝 Notas</div>
+        <div class="field">
+          <textarea id="mant-notas" rows="2" placeholder="Detalle del mantenimiento, observaciones..."></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" type="button" onclick="cerrarFormularioMantenimiento()">Cancelar</button>
+      <button class="btn btn-primary" type="button" onclick="guardarMantenimientoForm()">💾 GUARDAR</button>
+    </div>
+  </div>
+
+  <!-- MODAL — Galería de fotos del trabajo -->
+  <div id="modal-fotos" class="modal">
+    <div class="modal-header">
+      <button class="modal-close" type="button" onclick="cerrarGaleriaFotos()" aria-label="Cerrar">×</button>
+      <div class="modal-title">📷 FOTOS DEL TRABAJO</div>
+    </div>
+    <div class="modal-body" id="modal-fotos-body">
+      <input type="hidden" id="fotos-orden-numero">
+      <div class="dim txt-sm mb-6" id="fotos-orden-label">—</div>
+      <label class="btn btn-primary btn-block mb-6" style="cursor:pointer;">
+        📷 Agregar foto
+        <input type="file" id="fotos-input" accept="image/*" capture="environment" multiple style="display:none;" onchange="_onFotosSeleccionadas(event)">
+      </label>
+      <div id="fotos-galeria" class="fotos-galeria"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost btn-block" type="button" onclick="cerrarGaleriaFotos()">Cerrar</button>
+    </div>
+  </div>
+
+  <!-- MODAL — Ciudad / costo de viaje -->
+  <div id="modal-ciudad" class="modal">
+    <div class="modal-header">
+      <button class="modal-close" type="button" onclick="cerrarFormularioCiudad()" aria-label="Cerrar">×</button>
+      <div class="modal-title">🏙️ CIUDAD Y COSTO DE VIAJE</div>
+    </div>
+    <div class="modal-body" id="modal-ciudad-body">
+      <input type="hidden" id="ciudad-original">
+      <div class="card">
+        <div class="field"><label class="field-label">Ciudad *</label><input type="text" id="ciudad-nombre" placeholder="Ej: Cipolletti"></div>
+        <div class="field"><label class="field-label">Pertenece a la base</label>
+          <input type="hidden" id="ciudad-base" value="SMA">
+          <div class="dim txt-sm">San Martín de los Andes (base única)</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">💰 Costo de viaje</div>
+        <div class="field-row">
+          <div class="field"><label class="field-label">Pasaje ($)</label><input type="number" id="ciudad-pasaje" min="0" step="500" placeholder="0" inputmode="numeric"></div>
+          <div class="field"><label class="field-label">Combustible ($)</label><input type="number" id="ciudad-combustible" min="0" step="500" placeholder="0" inputmode="numeric"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label class="field-label">Vianda ($)</label><input type="number" id="ciudad-vianda" min="0" step="500" placeholder="0" inputmode="numeric"></div>
+          <div class="field"><label class="field-label">Hospedaje ($)</label><input type="number" id="ciudad-hospedaje" min="0" step="500" placeholder="0" inputmode="numeric"></div>
+        </div>
+        <div class="field" style="max-width:160px;"><label class="field-label">Tiempo de viaje (hs)</label><input type="number" id="ciudad-tiempo" min="0" step="0.5" placeholder="0" inputmode="decimal"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" type="button" onclick="cerrarFormularioCiudad()">Cancelar</button>
+      <button class="btn btn-primary" type="button" onclick="guardarCiudadForm()">💾 GUARDAR</button>
+    </div>
+  </div>
+
+  <!-- MODAL — Alertas WA -->
+  <div id="modal-alertas-wa" class="modal">
+    <div class="modal-header">
+      <button class="modal-close" type="button" onclick="document.getElementById('modal-alertas-wa').classList.remove('active')" aria-label="Cerrar">×</button>
+      <div class="modal-title">💬 ALERTAS WHATSAPP</div>
+    </div>
+    <div class="modal-body" id="modal-alertas-wa-body"></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost btn-block" type="button" onclick="document.getElementById('modal-alertas-wa').classList.remove('active')">Cerrar</button>
+    </div>
+  </div>
+
+  <!-- MODAL — Reset sistema -->
+  <div id="modal-reset" class="modal">
+    <div class="modal-header">
+      <button class="modal-close" type="button" onclick="document.getElementById('modal-reset').classList.remove('active')" aria-label="Cerrar">×</button>
+      <div class="modal-title">⚠️ RESET DEL SISTEMA</div>
+    </div>
+    <div class="modal-body" id="modal-reset-body">
+      <div class="card" style="border-color:var(--peligro);">
+        <div class="peligro bold mb-6">⚠️ ACCIÓN IRREVERSIBLE</div>
+        <div class="dim txt-sm">Esta acción eliminará TODOS los datos operativos. El backup de config se mantiene. Hacé un backup antes de continuar.</div>
+      </div>
+      <div id="reset-contadores-grid" class="cfg-counters-grid"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" type="button" onclick="document.getElementById('modal-reset').classList.remove('active')">Cancelar</button>
+      <button class="btn btn-peligro" type="button" onclick="ejecutarResetCompleto()">🗑️ CONFIRMAR RESET</button>
+    </div>
+  </div>
+
+  <!-- MODAL — Ciudad Operativa (Gasto Operativo v6.8) -->
+  <div id="modal-ciudad-op" class="modal">
+    <div class="modal-header">
+      <button class="modal-close" type="button" onclick="cerrarFormularioCiudadOp()" aria-label="Cerrar">×</button>
+      <div class="modal-title" id="modal-ciudad-op-title">+ Nueva ciudad</div>
+    </div>
+    <div class="modal-body" id="modal-ciudad-op-body"></div>
+  </div>
+
+  <!-- MODAL — Viaje Operativo (Gasto Operativo v6.8) -->
+  <div id="modal-viaje-op" class="modal">
+    <div class="modal-header">
+      <button class="modal-close" type="button" onclick="cerrarFormularioViajeOp()" aria-label="Cerrar">×</button>
+      <div class="modal-title" id="modal-viaje-op-title">🗺️ Planificar viaje</div>
+    </div>
+    <div class="modal-body" id="modal-viaje-op-body"></div>
+  </div>
+
+  <!-- MODAL — Detalle de Viaje Operativo -->
+  <div id="modal-viaje-detalle" class="modal">
+    <div class="modal-header">
+      <button class="modal-close" type="button" onclick="document.getElementById('modal-viaje-detalle').classList.remove('active')" aria-label="Cerrar">×</button>
+      <div class="modal-title" id="modal-viaje-detalle-title">📍 Detalle del viaje</div>
+    </div>
+    <div class="modal-body" id="modal-viaje-detalle-body"></div>
+  </div>
+
+</div><!-- #app -->
+
+<!-- Historial cliente modal (generado dinámicamente) -->
+
+<!-- ═══════════════════════════════
+     SCRIPTS (ES Modules)
+     ═══════════════════════════════ -->
+<script>
+  /* FAB inline - no puede ser módulo porque necesita acceso inmediato */
+  window._toggleFab = function() {
+    const menu = document.getElementById('fab-menu');
+    const btn  = document.getElementById('fab-btn');
+    if (!menu) return;
+    const isOpen = !menu.classList.contains('hide');
+    menu.classList.toggle('hide', isOpen);
+    btn.textContent = isOpen ? '+' : '×';
+    btn.classList.toggle('fab-open', !isOpen);
+  };
+
+  window._fabAction = function(tipo) {
+    window._toggleFab();
+    setTimeout(() => {
+      switch(tipo) {
+        case 'ing':    window.abrirFormularioING?.();    break;
+        case 'ott':    window.abrirFormularioOTT?.();    break;
+        case 'ote':    window.abrirFormularioOTE?.();    break;
+        case 'visita': window.abrirFormularioVisita?.();  break;
+        case 'pre':    window.abrirFormularioPRE?.();    break;
+        case 'turno':  window.abrirFormularioTurno?.();  break;
+        case 'mant':   window.abrirFormularioMantenimiento?.(); break;
+        case 'qr':     window.abrirLectorQR?.();          break;
+        case 'fallas': window.abrirModalFallas?.();      break;
+        case 'recibo': window.abrirModalRecibo?.();      break;
+      }
+    }, 100);
+  };
+
+  /* Cerrar FAB al tocar fuera */
+  document.addEventListener('click', function(e) {
+    const fab = document.getElementById('fab-container');
+    if (fab && !fab.contains(e.target)) {
+      const menu = document.getElementById('fab-menu');
+      const btn  = document.getElementById('fab-btn');
+      if (menu && !menu.classList.contains('hide')) {
+        menu.classList.add('hide');
+        btn.textContent = '+';
+        btn.classList.remove('fab-open');
+      }
+    }
+  });
+
+  /* Debounce handlers expuestos para el HTML */
+  let _panelST = null, _clientesST = null;
+  window._onPanelSearch    = () => { clearTimeout(_panelST);   _panelST   = setTimeout(() => window.renderPanelPrincipal?.(), 220); };
+  window._onClientesSearch = () => { clearTimeout(_clientesST); _clientesST = setTimeout(() => window.renderAdminClientes?.(), 220); };
+  window._onAdminMovsFiltro = () => { window.renderAdminMovs?.(); };
+</script>
+
+<!-- Entry point modular -->
+<!-- ════ CAPTURADOR DE ERRORES EN PANTALLA (temporal, quitar cuando todo funcione) ════ -->
+<script>
+(function(){
+  function mostrarError(titulo, detalle){
+    var box = document.getElementById('__err_overlay');
+    if(!box){
+      box = document.createElement('div');
+      box.id = '__err_overlay';
+      box.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:99999;'+
+        'background:#b71c1c;color:#fff;padding:14px;font:13px monospace;'+
+        'max-height:50vh;overflow:auto;box-shadow:0 4px 12px rgba(0,0,0,.5);';
+      document.body.appendChild(box);
+      var btn = document.createElement('button');
+      btn.textContent = 'Cerrar ✕';
+      btn.style.cssText = 'position:sticky;top:0;float:right;background:#fff;color:#b71c1c;'+
+        'border:none;padding:4px 10px;border-radius:6px;font-weight:bold;';
+      btn.onclick = function(){ box.remove(); };
+      box.appendChild(btn);
+    }
+    var p = document.createElement('div');
+    p.style.cssText = 'margin:8px 0;border-bottom:1px solid rgba(255,255,255,.3);padding-bottom:8px;';
+    p.innerHTML = '<b>'+titulo+'</b><br>'+detalle;
+    box.appendChild(p);
+  }
+  window.addEventListener('error', function(e){
+    mostrarError('ERROR: ' + (e.message||'desconocido'),
+      (e.filename||'').split('/').slice(-2).join('/') + ' línea ' + (e.lineno||'?'));
+  });
+  window.addEventListener('unhandledrejection', function(e){
+    var r = e.reason || {};
+    mostrarError('PROMESA RECHAZADA: ' + (r.message || r),
+      (r.stack||'').split('\n').slice(0,3).join('<br>'));
+  });
+  console.log('[debug-overlay] Capturador de errores activo');
+})();
+</script>
+
+<script type="module" src="./js/app.js"></script>
+
+</body>
+</html>

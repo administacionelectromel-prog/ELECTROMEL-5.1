@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ELECTROMEL — Muestra visual</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: system-ui, -apple-system, Arial, sans-serif; background: #0a0a0a; color: #f0f0f0; padding-bottom: 40px; }
+
+  .demo-top { background: #e8a020; color: #000; text-align: center; padding: 10px; font-size: 13px; font-weight: 600; position: sticky; top: 0; z-index: 100; }
+  .selector { display: flex; gap: 8px; padding: 14px; background: #141414; position: sticky; top: 38px; z-index: 99; overflow-x: auto; }
+  .sel-btn { flex-shrink: 0; padding: 10px 16px; border-radius: 10px; border: 1px solid #2a2a2a; background: #1a1a1a; color: #888; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+  .sel-btn.active { background: #e8a020; color: #000; border-color: #e8a020; }
+
+  .variante { display: none; padding: 16px; }
+  .variante.active { display: block; }
+  .v-titulo { font-size: 15px; color: #888; margin-bottom: 4px; }
+  .v-desc { font-size: 13px; color: #666; margin-bottom: 16px; line-height: 1.5; }
+
+  /* ───────── ACTUAL ───────── */
+  .actual { --bg:#0f0f0f; --surface:#1a1a1a; --surface-2:#232323; --acento:#e8a020; --texto:#f0f0f0; --texto-2:#888; --borde:#2a2a2a; }
+  .actual .app-header { background:#2d2d2d; padding:14px; border-radius:0; display:flex; align-items:center; gap:12px; margin-bottom:14px; }
+  .actual .logo { width:44px; height:44px; background:#000; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:20px; }
+  .actual .empresa { font-size:17px; font-weight:700; }
+  .actual .empresa-sub { font-size:12px; color:#888; }
+  .actual .card { background:#1a1a1a; border:1px solid #2a2a2a; border-radius:10px; padding:14px; margin-bottom:10px; }
+  .actual .card-borde { border-left:3px solid #4caf7d; }
+  .actual .badge { display:inline-block; padding:4px 10px; border-radius:6px; background:rgba(76,175,125,0.15); color:#4caf7d; font-size:11px; font-weight:600; }
+  .actual .ot-num { color:#e8a020; font-weight:700; }
+  .actual .ot-titulo { font-size:16px; font-weight:600; margin:6px 0; }
+  .actual .ot-sub { font-size:13px; color:#888; }
+  .actual .ot-monto { font-size:18px; font-weight:700; color:#e8a020; text-align:right; margin-top:8px; }
+  .actual .btn-primary { background:#e8a020; color:#000; border:none; padding:12px; border-radius:8px; font-weight:700; width:100%; font-size:14px; }
+
+  /* ───────── OPCIÓN A: PROFUNDIDAD ───────── */
+  .opA { --bg:#0d0d0f; }
+  .opA .app-header { background:linear-gradient(135deg,#2a2a2e,#1a1a1d); padding:18px 16px; border-radius:16px; display:flex; align-items:center; gap:14px; margin-bottom:18px; box-shadow:0 4px 20px rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.04); }
+  .opA .logo { width:48px; height:48px; background:linear-gradient(135deg,#1a1a1a,#000); border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:22px; box-shadow:0 2px 8px rgba(0,0,0,0.5); }
+  .opA .empresa { font-size:18px; font-weight:700; letter-spacing:-0.3px; }
+  .opA .empresa-sub { font-size:12px; color:#999; margin-top:2px; }
+  .opA .card { background:#16161a; border:1px solid rgba(255,255,255,0.05); border-radius:16px; padding:16px; margin-bottom:12px; box-shadow:0 2px 12px rgba(0,0,0,0.3); transition:transform 0.15s; }
+  .opA .card:active { transform:scale(0.98); }
+  .opA .card-borde { border-left:3px solid #4caf7d; }
+  .opA .badge { display:inline-block; padding:5px 12px; border-radius:20px; background:rgba(76,175,125,0.18); color:#5cc98d; font-size:11px; font-weight:600; }
+  .opA .ot-num { color:#f0b040; font-weight:700; }
+  .opA .ot-titulo { font-size:17px; font-weight:700; margin:8px 0; letter-spacing:-0.2px; }
+  .opA .ot-sub { font-size:13px; color:#999; }
+  .opA .ot-monto { font-size:20px; font-weight:800; color:#f0b040; text-align:right; margin-top:10px; letter-spacing:-0.5px; }
+  .opA .btn-primary { background:linear-gradient(135deg,#f0b040,#e8a020); color:#000; border:none; padding:14px; border-radius:14px; font-weight:700; width:100%; font-size:15px; box-shadow:0 4px 16px rgba(232,160,32,0.3); }
+
+  /* ───────── OPCIÓN B: VIBRANTE ───────── */
+  .opB { --bg:#0a0a12; }
+  .opB .app-header { background:linear-gradient(135deg,#1e1b3a,#16213e); padding:20px 16px; border-radius:18px; display:flex; align-items:center; gap:14px; margin-bottom:18px; box-shadow:0 8px 32px rgba(80,60,200,0.15); }
+  .opB .logo { width:50px; height:50px; background:linear-gradient(135deg,#6d5dfc,#4a3fc8); border-radius:14px; display:flex; align-items:center; justify-content:center; font-size:24px; box-shadow:0 4px 16px rgba(109,93,252,0.4); }
+  .opB .empresa { font-size:19px; font-weight:800; background:linear-gradient(135deg,#fff,#b8b0ff); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+  .opB .empresa-sub { font-size:12px; color:#9990d0; margin-top:2px; }
+  .opB .card { background:linear-gradient(135deg,#16162a,#12121f); border:1px solid rgba(120,100,255,0.12); border-radius:18px; padding:16px; margin-bottom:12px; box-shadow:0 4px 20px rgba(0,0,0,0.4); }
+  .opB .card-borde { border-left:3px solid #6d5dfc; }
+  .opB .badge { display:inline-block; padding:5px 12px; border-radius:20px; background:linear-gradient(135deg,rgba(76,200,141,0.2),rgba(76,200,141,0.1)); color:#5cc98d; font-size:11px; font-weight:600; }
+  .opB .ot-num { color:#8b7dff; font-weight:700; }
+  .opB .ot-titulo { font-size:17px; font-weight:700; margin:8px 0; }
+  .opB .ot-sub { font-size:13px; color:#9990b0; }
+  .opB .ot-monto { font-size:21px; font-weight:800; background:linear-gradient(135deg,#8b7dff,#6d5dfc); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; text-align:right; margin-top:10px; }
+  .opB .btn-primary { background:linear-gradient(135deg,#6d5dfc,#4a3fc8); color:#fff; border:none; padding:14px; border-radius:14px; font-weight:700; width:100%; font-size:15px; box-shadow:0 6px 20px rgba(109,93,252,0.4); }
+
+  /* ───────── OPCIÓN C: LIMPIO/CLARO ───────── */
+  .opC { --bg:#f5f6f8; }
+  .opC .app-header { background:#fff; padding:18px 16px; border-radius:16px; display:flex; align-items:center; gap:14px; margin-bottom:18px; box-shadow:0 2px 12px rgba(0,0,0,0.06); border:1px solid #eee; }
+  .opC .logo { width:48px; height:48px; background:linear-gradient(135deg,#1a1a1a,#333); border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:22px; }
+  .opC .empresa { font-size:18px; font-weight:700; color:#1a1a1a; }
+  .opC .empresa-sub { font-size:12px; color:#888; margin-top:2px; }
+  .opC .card { background:#fff; border:1px solid #ececec; border-radius:16px; padding:16px; margin-bottom:12px; box-shadow:0 2px 10px rgba(0,0,0,0.04); }
+  .opC .card-borde { border-left:3px solid #2ba968; }
+  .opC .badge { display:inline-block; padding:5px 12px; border-radius:20px; background:#e6f7ee; color:#2ba968; font-size:11px; font-weight:600; }
+  .opC .ot-num { color:#d68910; font-weight:700; }
+  .opC .ot-titulo { font-size:17px; font-weight:700; margin:8px 0; color:#1a1a1a; }
+  .opC .ot-sub { font-size:13px; color:#888; }
+  .opC .ot-monto { font-size:20px; font-weight:800; color:#d68910; text-align:right; margin-top:10px; }
+  .opC .btn-primary { background:#1a1a1a; color:#fff; border:none; padding:14px; border-radius:14px; font-weight:700; width:100%; font-size:15px; }
+
+  .demo-wrap { border-radius:20px; padding:14px; }
+</style>
+</head>
+<body>
+  <div class="demo-top">🎨 MUESTRA VISUAL — tocá las opciones de arriba. No es la app real.</div>
+
+  <div class="selector">
+    <button class="sel-btn active" onclick="verVar('actual', this)">Actual</button>
+    <button class="sel-btn" onclick="verVar('opA', this)">A · Profundidad</button>
+    <button class="sel-btn" onclick="verVar('opB', this)">B · Vibrante</button>
+    <button class="sel-btn" onclick="verVar('opC', this)">C · Claro</button>
+  </div>
+
+  <!-- ACTUAL -->
+  <div class="variante actual active" id="var-actual" style="background:var(--bg);">
+    <div class="v-titulo">📱 Tu estilo actual</div>
+    <div class="v-desc">Tema oscuro, acento ámbar, tarjetas planas. Sobrio y funcional.</div>
+    <div class="demo-wrap">
+      <div class="app-header">
+        <div class="logo">⚙️</div>
+        <div><div class="empresa">ELECTROMEL</div><div class="empresa-sub">Servicio Técnico de Soldadoras Inverter</div></div>
+      </div>
+      <div class="card card-borde">
+        <div><span class="badge">EN REPARACIÓN</span></div>
+        <div class="ot-titulo">Eduardo Muñoz</div>
+        <div class="ot-sub">🔧 OT Taller · OTT-00004</div>
+        <div class="ot-sub">Cortadora Plasma IPC 9014</div>
+        <div class="ot-monto">$245.000,00</div>
+      </div>
+      <div class="card card-borde">
+        <div><span class="badge">REPARADO</span></div>
+        <div class="ot-titulo">Luis Caballero</div>
+        <div class="ot-sub">🔧 OT Taller · OTT-00005</div>
+        <div class="ot-monto">$175.000,00</div>
+      </div>
+      <button class="btn-primary">💾 Guardar</button>
+    </div>
+  </div>
+
+  <!-- OPCIÓN A -->
+  <div class="variante opA" id="var-opA" style="background:var(--bg);">
+    <div class="v-titulo">✨ Opción A — Profundidad</div>
+    <div class="v-desc">Mismo estilo oscuro y ámbar, pero con sombras suaves, esquinas redondeadas, degradados sutiles y más aire. Moderniza sin cambiar tu identidad.</div>
+    <div class="demo-wrap">
+      <div class="app-header">
+        <div class="logo">⚙️</div>
+        <div><div class="empresa">ELECTROMEL</div><div class="empresa-sub">Servicio Técnico de Soldadoras Inverter</div></div>
+      </div>
+      <div class="card card-borde">
+        <div><span class="badge">EN REPARACIÓN</span></div>
+        <div class="ot-titulo">Eduardo Muñoz</div>
+        <div class="ot-sub">🔧 OT Taller · OTT-00004</div>
+        <div class="ot-sub">Cortadora Plasma IPC 9014</div>
+        <div class="ot-monto">$245.000,00</div>
+      </div>
+      <div class="card card-borde">
+        <div><span class="badge">REPARADO</span></div>
+        <div class="ot-titulo">Luis Caballero</div>
+        <div class="ot-sub">🔧 OT Taller · OTT-00005</div>
+        <div class="ot-monto">$175.000,00</div>
+      </div>
+      <button class="btn-primary">💾 Guardar</button>
+    </div>
+  </div>
+
+  <!-- OPCIÓN B -->
+  <div class="variante opB" id="var-opB" style="background:var(--bg);">
+    <div class="v-titulo">🚀 Opción B — Vibrante</div>
+    <div class="v-desc">Cambio más audaz: acento violeta, degradados llamativos, texto con brillo. Se ve muy moderno pero cambia tu identidad de marca (perdés el ámbar).</div>
+    <div class="demo-wrap">
+      <div class="app-header">
+        <div class="logo">⚙️</div>
+        <div><div class="empresa">ELECTROMEL</div><div class="empresa-sub">Servicio Técnico de Soldadoras Inverter</div></div>
+      </div>
+      <div class="card card-borde">
+        <div><span class="badge">EN REPARACIÓN</span></div>
+        <div class="ot-titulo">Eduardo Muñoz</div>
+        <div class="ot-sub">🔧 OT Taller · OTT-00004</div>
+        <div class="ot-sub">Cortadora Plasma IPC 9014</div>
+        <div class="ot-monto">$245.000,00</div>
+      </div>
+      <div class="card card-borde">
+        <div><span class="badge">REPARADO</span></div>
+        <div class="ot-titulo">Luis Caballero</div>
+        <div class="ot-sub">🔧 OT Taller · OTT-00005</div>
+        <div class="ot-monto">$175.000,00</div>
+      </div>
+      <button class="btn-primary">💾 Guardar</button>
+    </div>
+  </div>
+
+  <!-- OPCIÓN C -->
+  <div class="variante opC" id="var-opC" style="background:var(--bg);">
+    <div class="v-titulo">☀️ Opción C — Claro</div>
+    <div class="v-desc">Tema claro, fondo blanco, look limpio tipo apps modernas. Más legible con sol/exterior, pero es el cambio más grande respecto a lo que tenés.</div>
+    <div class="demo-wrap">
+      <div class="app-header">
+        <div class="logo">⚙️</div>
+        <div><div class="empresa">ELECTROMEL</div><div class="empresa-sub">Servicio Técnico de Soldadoras Inverter</div></div>
+      </div>
+      <div class="card card-borde">
+        <div><span class="badge">EN REPARACIÓN</span></div>
+        <div class="ot-titulo">Eduardo Muñoz</div>
+        <div class="ot-sub">🔧 OT Taller · OTT-00004</div>
+        <div class="ot-sub">Cortadora Plasma IPC 9014</div>
+        <div class="ot-monto">$245.000,00</div>
+      </div>
+      <div class="card card-borde">
+        <div><span class="badge">REPARADO</span></div>
+        <div class="ot-titulo">Luis Caballero</div>
+        <div class="ot-sub">🔧 OT Taller · OTT-00005</div>
+        <div class="ot-monto">$175.000,00</div>
+      </div>
+      <button class="btn-primary">💾 Guardar</button>
+    </div>
+  </div>
+
+<script>
+  function verVar(v, el) {
+    document.querySelectorAll('.variante').forEach(x => x.classList.remove('active'));
+    document.getElementById('var-' + v).classList.add('active');
+    document.querySelectorAll('.sel-btn').forEach(b => b.classList.remove('active'));
+    el.classList.add('active');
+  }
+</script>
+</body>
+</html>

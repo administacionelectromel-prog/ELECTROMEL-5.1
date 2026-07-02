@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prototipo — Abonos ELECTROMEL</title>
+<style>
+  :root{
+    --bg:#0f0f0f; --surface:#1a1a1a; --surface-2:#232323;
+    --acento:#e8a020; --exito:#4caf7d; --peligro:#e05050;
+    --texto:#f0f0f0; --texto-2:#888; --borde:#2a2a2a;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{background:var(--bg); color:var(--texto); font-family:system-ui,Arial,sans-serif; padding-bottom:80px;}
+  .demo-banner{background:var(--acento); color:#000; text-align:center; padding:8px; font-size:13px; font-weight:600;}
+  .header{background:var(--surface); padding:16px; border-bottom:1px solid var(--borde); position:sticky; top:0; z-index:10;}
+  .header h1{font-size:18px; display:flex; align-items:center; gap:8px;}
+  .buscador{width:100%; margin-top:12px; padding:11px 14px; border-radius:10px; border:1px solid var(--borde); background:var(--surface-2); color:var(--texto); font-size:15px;}
+  .buscador::placeholder{color:var(--texto-2);}
+  .sin-resultados{text-align:center; padding:30px; color:var(--texto-2); display:none;}
+  .resumen{display:flex; gap:10px; padding:14px; flex-wrap:wrap;}
+  .kpi{flex:1; min-width:90px; background:var(--surface); border:1px solid var(--borde); border-radius:10px; padding:12px; text-align:center;}
+  .kpi-label{font-size:11px; color:var(--texto-2); text-transform:uppercase; letter-spacing:.5px;}
+  .kpi-valor{font-size:20px; font-weight:700; margin-top:4px;}
+  .kpi-valor.verde{color:var(--exito);}
+  .kpi-valor.rojo{color:var(--peligro);}
+  .seccion-titulo{padding:8px 16px; font-size:13px; color:var(--texto-2); text-transform:uppercase; letter-spacing:.5px;}
+  .cliente{background:var(--surface); border:1px solid var(--borde); border-radius:12px; margin:8px 14px; padding:14px; cursor:pointer; transition:.15s;}
+  .cliente:active{transform:scale(.99);}
+  .cliente-top{display:flex; justify-content:space-between; align-items:flex-start; gap:10px;}
+  .cliente-nombre{font-size:16px; font-weight:600;}
+  .cliente-equipo{font-size:13px; color:var(--texto-2); margin-top:2px;}
+  .cliente-cuota{font-size:16px; font-weight:700; color:var(--acento); white-space:nowrap;}
+  .cliente-cuota small{display:block; font-size:11px; color:var(--texto-2); font-weight:400;}
+  .estado{display:inline-block; padding:3px 10px; border-radius:20px; font-size:12px; font-weight:600; margin-top:8px;}
+  .estado.aldia{background:rgba(76,175,125,.15); color:var(--exito);}
+  .estado.debe{background:rgba(224,80,80,.15); color:var(--peligro);}
+  .estado.porvencer{background:rgba(232,160,32,.15); color:var(--acento);}
+  .cliente-detalle{margin-top:12px; padding-top:12px; border-top:1px solid var(--borde); display:none;}
+  .cliente-detalle.abierto{display:block;}
+  .row{display:flex; justify-content:space-between; padding:5px 0; font-size:14px;}
+  .row .lbl{color:var(--texto-2);}
+  .acciones{display:flex; gap:8px; margin-top:12px; flex-wrap:wrap;}
+  .btn{flex:1; min-width:120px; padding:10px; border-radius:8px; border:none; font-size:13px; font-weight:600; cursor:pointer;}
+  .btn-cobrar{background:var(--exito); color:#000;}
+  .btn-visita{background:var(--surface-2); color:var(--texto); border:1px solid var(--borde);}
+  .btn-historial{background:var(--surface-2); color:var(--texto); border:1px solid var(--borde);}
+  .meses{display:flex; gap:4px; margin-top:10px; flex-wrap:wrap;}
+  .mes{width:32px; height:32px; border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:600;}
+  .mes.pago{background:var(--exito); color:#000;}
+  .mes.debe{background:var(--peligro); color:#fff;}
+  .mes.futuro{background:var(--surface-2); color:var(--texto-2);}
+  .fab{position:fixed; bottom:20px; right:20px; background:var(--acento); color:#000; width:56px; height:56px; border-radius:50%; border:none; font-size:28px; cursor:pointer; box-shadow:0 4px 12px rgba(0,0,0,.4);}
+  .nota{margin:16px 14px; padding:12px; background:rgba(232,160,32,.08); border:1px solid rgba(232,160,32,.3); border-radius:10px; font-size:13px; color:var(--texto-2); line-height:1.5;}
+</style>
+</head>
+<body>
+  <div class="demo-banner">⚠️ PROTOTIPO — solo para visualizar. No es la app real.</div>
+
+  <div class="header">
+    <h1>💳 Clientes con abono</h1>
+    <input type="text" class="buscador" placeholder="🔍 Buscar cliente, equipo o zona..." oninput="filtrar(this.value)">
+  </div>
+
+  <div class="resumen">
+    <div class="kpi"><div class="kpi-label">Clientes</div><div class="kpi-valor">12</div></div>
+    <div class="kpi"><div class="kpi-label">A cobrar/mes</div><div class="kpi-valor verde">$485.000</div></div>
+    <div class="kpi"><div class="kpi-label">Adeudado</div><div class="kpi-valor rojo">$95.000</div></div>
+  </div>
+
+  <div class="seccion-titulo">🔴 Con deuda (2)</div>
+
+  <div class="cliente" onclick="toggle(this)">
+    <div class="cliente-top">
+      <div>
+        <div class="cliente-nombre">Gimnasio Olimpo</div>
+        <div class="cliente-equipo">6 máquinas · Mantenimiento integral</div>
+        <span class="estado debe">Debe 2 meses · $90.000</span>
+      </div>
+      <div class="cliente-cuota">$45.000<small>por mes</small></div>
+    </div>
+    <div class="cliente-detalle">
+      <div class="row"><span class="lbl">Cliente desde</span><span>Marzo 2026</span></div>
+      <div class="row"><span class="lbl">Incluye</span><span>Service + repuestos básicos</span></div>
+      <div class="row"><span class="lbl">Próxima visita</span><span>según agenda</span></div>
+      <div class="meses">
+        <div class="mes pago">Mar</div><div class="mes pago">Abr</div>
+        <div class="mes debe">May</div><div class="mes debe">Jun</div>
+        <div class="mes futuro">Jul</div><div class="mes futuro">Ago</div>
+      </div>
+      <div class="acciones">
+        <button class="btn btn-cobrar">💵 Registrar pago</button>
+        <button class="btn btn-visita">🚐 Agendar visita</button>
+        <button class="btn btn-historial">📋 Historial</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="cliente" onclick="toggle(this)">
+    <div class="cliente-top">
+      <div>
+        <div class="cliente-nombre">Carlos Méndez</div>
+        <div class="cliente-equipo">Soldadora Inverter Esab · Service trimestral</div>
+        <span class="estado debe">Debe 1 mes · $5.000</span>
+      </div>
+      <div class="cliente-cuota">$5.000<small>por mes</small></div>
+    </div>
+    <div class="cliente-detalle">
+      <div class="row"><span class="lbl">Cliente desde</span><span>Enero 2026</span></div>
+      <div class="row"><span class="lbl">Incluye</span><span>Solo mano de obra</span></div>
+      <div class="acciones">
+        <button class="btn btn-cobrar">💵 Registrar pago</button>
+        <button class="btn btn-visita">🚐 Agendar visita</button>
+        <button class="btn btn-historial">📋 Historial</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="seccion-titulo">🟡 Por vencer este mes (1)</div>
+
+  <div class="cliente" onclick="toggle(this)">
+    <div class="cliente-top">
+      <div>
+        <div class="cliente-nombre">Taller Hnos. Paz</div>
+        <div class="cliente-equipo">Compresor + 2 soldadoras</div>
+        <span class="estado porvencer">Vence el 15/06</span>
+      </div>
+      <div class="cliente-cuota">$30.000<small>por mes</small></div>
+    </div>
+    <div class="cliente-detalle">
+      <div class="row"><span class="lbl">Cliente desde</span><span>Febrero 2026</span></div>
+      <div class="row"><span class="lbl">Incluye</span><span>Service + urgencias</span></div>
+      <div class="acciones">
+        <button class="btn btn-cobrar">💵 Registrar pago</button>
+        <button class="btn btn-visita">🚐 Agendar visita</button>
+        <button class="btn btn-historial">📋 Historial</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="seccion-titulo">🟢 Al día (9)</div>
+
+  <div class="cliente" onclick="toggle(this)">
+    <div class="cliente-top">
+      <div>
+        <div class="cliente-nombre">Gimnasio FitZone</div>
+        <div class="cliente-equipo">8 máquinas · Mantenimiento integral</div>
+        <span class="estado aldia">Al día ✓</span>
+      </div>
+      <div class="cliente-cuota">$60.000<small>por mes</small></div>
+    </div>
+    <div class="cliente-detalle">
+      <div class="row"><span class="lbl">Cliente desde</span><span>Diciembre 2025</span></div>
+      <div class="row"><span class="lbl">Incluye</span><span>Service + repuestos + urgencias</span></div>
+      <div class="meses">
+        <div class="mes pago">Ene</div><div class="mes pago">Feb</div>
+        <div class="mes pago">Mar</div><div class="mes pago">Abr</div>
+        <div class="mes pago">May</div><div class="mes pago">Jun</div>
+      </div>
+      <div class="acciones">
+        <button class="btn btn-cobrar">💵 Registrar pago</button>
+        <button class="btn btn-visita">🚐 Agendar visita</button>
+        <button class="btn btn-historial">📋 Historial</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="nota">
+    💡 Así se vería el módulo. Cada cliente muestra su cuota, si está al día o debe, y los meses pagados (verde) o adeudados (rojo). Tocá un cliente para ver el detalle y las acciones. El botón "+" abajo agregaría un cliente nuevo al abono.
+  </div>
+
+  <div class="sin-resultados" id="sin-res">No se encontraron clientes con ese nombre.</div>
+
+  <button class="fab" onclick="alert('Acá se abriría el formulario para dar de alta un cliente con abono: nombre, equipo, cuota mensual, qué incluye, día de cobro.')">+</button>
+
+<script>
+  function toggle(el){
+    const d = el.querySelector('.cliente-detalle');
+    document.querySelectorAll('.cliente-detalle.abierto').forEach(o=>{ if(o!==d) o.classList.remove('abierto'); });
+    d.classList.toggle('abierto');
+  }
+  function filtrar(q){
+    q = q.trim().toLowerCase();
+    let visibles = 0;
+    document.querySelectorAll('.cliente').forEach(c=>{
+      const txt = c.innerText.toLowerCase();
+      const match = !q || txt.includes(q);
+      c.style.display = match ? '' : 'none';
+      if(match) visibles++;
+    });
+    /* Ocultar títulos de sección si su grupo quedó vacío */
+    document.querySelectorAll('.seccion-titulo').forEach(t=>{
+      let n = t.nextElementSibling, hayVisible = false;
+      while(n && n.classList.contains('cliente')){
+        if(n.style.display !== 'none') hayVisible = true;
+        n = n.nextElementSibling;
+      }
+      t.style.display = (q && !hayVisible) ? 'none' : '';
+    });
+    document.getElementById('sin-res').style.display = (q && visibles===0) ? 'block' : 'none';
+  }
+</script>
+</body>
+</html>

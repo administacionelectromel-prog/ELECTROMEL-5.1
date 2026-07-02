@@ -1,0 +1,860 @@
+/** ELECTROMEL — agenda.css | Módulo agenda, config panel, plantillas */
+
+/* ════════════════════════════════════════════════════════════════
+   AGENDA — Paso 12
+   ════════════════════════════════════════════════════════════════ */
+.agenda-topbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  padding: 4px 0;
+}
+.agenda-nav-btn {
+  background: var(--surface-2);
+  border: 1px solid var(--borde-2);
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--texto);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.agenda-semana-label {
+  flex: 1;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--texto);
+}
+
+.agenda-filtros {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 10px;
+  align-items: center;
+}
+.agenda-filtro {
+  background: var(--surface-2);
+  border: 1px solid var(--borde-2);
+  color: var(--texto-2);
+  border-radius: 14px;
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.agenda-filtro.active {
+  background: var(--acento);
+  color: #1a1a1a;
+  border-color: var(--acento);
+}
+
+/* Banner NQN (cuando hay turnos NQN en la semana) */
+.nqn-banner {
+  border-radius: var(--r-md);
+  padding: 10px 12px;
+  margin-bottom: 10px;
+}
+.nqn-banner.viaje-conviene {
+  background: rgba(76,175,125,0.12);
+  border: 1px solid rgba(76,175,125,0.4);
+}
+.nqn-banner.viaje-revisar {
+  background: rgba(232,160,32,0.12);
+  border: 1px solid rgba(232,160,32,0.4);
+}
+.nqn-banner.viaje-no-conviene {
+  background: rgba(224,80,80,0.12);
+  border: 1px solid rgba(224,80,80,0.4);
+}
+.nqn-banner-content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.nqn-banner-icon {
+  font-size: 24px;
+}
+.nqn-banner-text { flex: 1; }
+.nqn-banner-title {
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--texto);
+}
+.nqn-banner-detail {
+  font-size: 12px;
+  color: var(--texto-2);
+  margin-top: 2px;
+}
+
+/* Día de la semana */
+.agenda-dia {
+  background: var(--surface-2);
+  border: 1px solid var(--borde);
+  border-radius: var(--r-md);
+  margin-bottom: 10px;
+  overflow: hidden;
+}
+.agenda-dia.hoy {
+  border-color: var(--acento);
+}
+.agenda-dia-head {
+  background: var(--surface-3);
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--texto);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.agenda-dia-head.hoy-badge::before {
+  content: "HOY";
+  background: var(--acento);
+  color: #1a1a1a;
+  padding: 2px 7px;
+  border-radius: 8px;
+  font-size: 10px;
+  letter-spacing: 0.5px;
+}
+.agenda-dia-fecha {
+  margin-left: auto;
+  color: var(--texto-2);
+  font-weight: 500;
+  font-size: 11px;
+  font-family: var(--ff-mono);
+}
+.agenda-dia-empty {
+  padding: 12px;
+  color: var(--texto-3);
+  font-size: 12px;
+  text-align: center;
+  font-style: italic;
+}
+
+/* Tarjeta de turno */
+.turno-card {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--borde);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  cursor: pointer;
+}
+.turno-card:last-child { border-bottom: none; }
+.turno-card:active { background: var(--surface-3); }
+.turno-card.turno-cerrado { opacity: .5; }
+.turno-card.turno-cerrado .turno-card-cliente { text-decoration: line-through; }
+.turno-card-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+}
+.turno-card-hora {
+  font-family: var(--ff-mono);
+  font-weight: 700;
+  color: var(--acento);
+}
+.turno-card-base {
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 8px;
+  background: var(--surface-3);
+  color: var(--texto-2);
+  letter-spacing: 0.5px;
+}
+.turno-card-base.base-nqn {
+  background: rgba(30,80,160,0.2);
+  color: #6098e0;
+}
+.turno-card-base.base-sma {
+  background: rgba(76,175,125,0.2);
+  color: var(--exito);
+}
+.turno-card-estado {
+  margin-left: auto;
+  font-size: 10px;
+  padding: 2px 7px;
+  border-radius: 8px;
+  background: var(--surface-3);
+  color: var(--texto-2);
+  font-weight: 600;
+}
+.turno-card-estado.estado-confirmado { background: rgba(76,175,125,0.2); color: var(--exito); }
+.turno-card-estado.estado-realizado  { background: rgba(76,175,125,0.3); color: var(--exito); }
+.turno-card-estado.estado-cancelado  { background: rgba(224,80,80,0.2); color: var(--peligro); opacity: 0.7; }
+
+.turno-card-cliente {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--texto);
+}
+.turno-card-servicio {
+  font-size: 12px;
+  color: var(--texto-2);
+}
+.turno-card-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 2px;
+  gap: 8px;
+}
+.turno-card-ingreso {
+  font-family: var(--ff-mono);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--acento);
+}
+.turno-card-score {
+  font-size: 10px;
+  padding: 2px 7px;
+  border-radius: 8px;
+  font-weight: 700;
+}
+.turno-card-score.score-alto  { background: rgba(76,175,125,0.2); color: var(--exito); }
+.turno-card-score.score-medio { background: rgba(232,160,32,0.2); color: #e8a020; }
+.turno-card-score.score-bajo  { background: rgba(224,80,80,0.2); color: var(--peligro); }
+
+/* Score circle dentro del modal */
+.turno-score-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.turno-score-circle {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: var(--surface-3);
+  border: 3px solid var(--acento);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.turno-score-circle.score-alto  { border-color: var(--exito); }
+.turno-score-circle.score-medio { border-color: #e8a020; }
+.turno-score-circle.score-bajo  { border-color: var(--peligro); }
+.turno-score-num {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--texto);
+  line-height: 1;
+}
+.turno-score-label {
+  font-size: 9px;
+  color: var(--texto-3);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 2px;
+}
+.turno-decision {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--texto);
+}
+.turno-decision.decision-aceptar   { color: var(--exito); }
+.turno-decision.decision-revisar   { color: #e8a020; }
+.turno-decision.decision-rechazar  { color: var(--peligro); }
+.turno-decision.decision-reagendar { color: #6098e0; }
+
+/* Sugerencias IA dentro de Agenda IQ */
+.sugerencia-item {
+  background: var(--surface-2);
+  border: 1px solid var(--borde-2);
+  border-left: 3px solid var(--acento);
+  border-radius: var(--r-sm);
+  padding: 10px 12px;
+  margin-bottom: 8px;
+}
+.sugerencia-item-titulo {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--texto);
+  margin-bottom: 4px;
+}
+.sugerencia-item-detalle {
+  font-size: 12px;
+  color: var(--texto-2);
+  margin-bottom: 8px;
+}
+.sugerencia-item-acciones {
+  display: flex;
+  gap: 6px;
+}
+.sugerencia-item-acciones .btn { flex: 1; font-size: 11px; padding: 5px 8px; }
+
+/* Banner de alertas WhatsApp (Paso 11 - bloque E) */
+.alertas-wa {
+  background: linear-gradient(135deg, rgba(76,175,125,0.15) 0%, rgba(76,175,125,0.08) 100%);
+  border: 1px solid rgba(76,175,125,0.4);
+  border-radius: var(--r-md);
+  padding: 10px 12px;
+  margin-bottom: 10px;
+}
+.alertas-wa-content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.alertas-wa-icon {
+  font-size: 24px;
+}
+.alertas-wa-text {
+  flex: 1;
+  font-size: 13px;
+  color: var(--texto);
+}
+.alertas-wa-text strong {
+  color: var(--exito);
+  font-size: 15px;
+}
+
+/* Item dentro del modal de alertas */
+.alerta-item {
+  background: var(--surface-2);
+  border: 1px solid var(--borde-2);
+  border-radius: var(--r-sm);
+  padding: 10px 12px;
+  margin-bottom: 8px;
+}
+.alerta-item-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+  font-size: 12px;
+}
+.alerta-item-numero {
+  font-family: var(--ff-mono);
+  font-weight: 700;
+  color: var(--acento);
+}
+.alerta-item-dias {
+  margin-left: auto;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 600;
+}
+.alerta-item-dias.umbral-15  { background: rgba(232,160,32,0.2); color: #e8a020; }
+.alerta-item-dias.umbral-30  { background: rgba(232,160,32,0.3); color: #e8a020; }
+.alerta-item-dias.umbral-60  { background: rgba(224,80,80,0.2); color: var(--peligro); }
+.alerta-item-dias.umbral-120 { background: rgba(224,80,80,0.3); color: var(--peligro); }
+.alerta-item-dias.abandono   { background: rgba(120,120,120,0.3); color: var(--texto-2); }
+.alerta-item-cliente {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--texto);
+}
+.alerta-item-equipo {
+  font-size: 11px;
+  color: var(--texto-3);
+  margin-bottom: 8px;
+}
+.alerta-item-actions {
+  display: flex;
+  gap: 6px;
+}
+.alerta-item-actions .btn {
+  flex: 1;
+  font-size: 12px;
+  padding: 6px 8px;
+}
+/* ════════════════════════════════════════════════════════════════
+   CONFIG PANEL — estilos específicos
+   ════════════════════════════════════════════════════════════════ */
+
+.config-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  padding: 4px 0;
+}
+
+.config-topbar-title {
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+}
+
+/* Las .cfg-section nacen visibles (HTML estático),
+   pero el JS las envuelve en collapsibles dinámicamente al abrir el panel.
+   Si por alguna razón el JS no se ejecutó, igual se ven en orden plano. */
+.cfg-section {
+  background: var(--surface);
+  border: 1px solid var(--borde);
+  border-radius: var(--r);
+  padding: 14px;
+  margin-bottom: 10px;
+}
+
+/* Cuando el JS las haya envuelto, se mueven dentro de .collapsible-body
+   y la .cfg-section pierde su contenedor visible (transparente). */
+.collapsible-body .cfg-section {
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* Items de períodos de base (NQN/SMA) */
+.bp-item {
+  display: grid;
+  grid-template-columns: 70px 1fr 1fr 36px;
+  gap: 6px;
+  align-items: center;
+  background: var(--surface-2);
+  border: 1px solid var(--borde-2);
+  border-radius: var(--r-sm);
+  padding: 8px;
+  margin-bottom: 6px;
+}
+
+.bp-item select,
+.bp-item input {
+  padding: 7px 8px;
+  font-size: 13px;
+}
+
+.bp-item .bp-remove {
+  width: 36px;
+  height: 36px;
+  background: var(--surface-3);
+  border: 1px solid var(--borde-2);
+  border-radius: var(--r-sm);
+  color: var(--peligro);
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Filas de contadores en CONFIG → Numeración */
+.counter-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  background: var(--surface-2);
+  border: 1px solid var(--borde-2);
+  border-radius: var(--r-sm);
+  padding: 12px;
+  margin-bottom: 8px;
+}
+
+.counter-info { flex: 1; min-width: 0; }
+
+.counter-tipo {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  margin-bottom: 3px;
+}
+
+.counter-current {
+  font-size: 11px;
+  color: var(--texto-2);
+}
+
+.counter-row .btn {
+  flex-shrink: 0;
+}
+
+/* Estilo de confirmación: el botón se vuelve rojo y dice "¿Seguro?" */
+.counter-row .btn.confirming,
+.btn-danger.confirming {
+  background: var(--peligro);
+  color: #fff;
+  border-color: var(--peligro);
+  animation: pulseConfirm 0.6s ease-in-out infinite alternate;
+}
+
+@keyframes pulseConfirm {
+  from { box-shadow: 0 0 0 0 rgba(224, 80, 80, 0.5); }
+  to   { box-shadow: 0 0 0 6px rgba(224, 80, 80, 0); }
+}
+
+/* Zona de peligro: sección entera con borde rojo sutil */
+.collapsible-body .danger-zone {
+  border: 1px solid rgba(224, 80, 80, 0.4);
+  background: rgba(224, 80, 80, 0.04);
+  border-radius: var(--r-sm);
+  padding: 12px;
+}
+
+.danger-btn {
+  background: linear-gradient(135deg, #c03030 0%, #801010 100%);
+  color: #fff;
+  border: 1px solid var(--peligro);
+  font-weight: 800;
+  letter-spacing: 0.5px;
+}
+
+.danger-btn:active {
+  transform: scale(0.97);
+}
+
+.danger-btn:disabled {
+  background: var(--surface-3);
+  color: var(--texto-3);
+  border-color: var(--borde);
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.danger-btn:disabled:active {
+  transform: none;
+}
+
+/* Lista de conteos en el modal de reset */
+.reset-counts {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.reset-counts li {
+  display: flex;
+  justify-content: space-between;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--borde);
+  font-size: 13px;
+}
+
+.reset-counts li:last-child {
+  border-bottom: none;
+}
+
+.reset-counts .count-num {
+  font-family: var(--ff-mono);
+  font-weight: 700;
+  color: var(--peligro);
+}
+
+
+.row    { display: flex; align-items: center; gap: 8px; }
+.row-sb { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.col    { display: flex; flex-direction: column; gap: 8px; }
+.flex-1 { flex: 1; }
+.gap-4  { gap: 8px; }
+.mt-2   { margin-top: 4px; }  .mt-4 { margin-top: 8px; }  .mt-6 { margin-top: 12px; } .mt-8 { margin-top: 16px; }
+.mb-2   { margin-bottom: 4px; } .mb-4 { margin-bottom: 8px; } .mb-6 { margin-bottom: 12px; } .mb-8 { margin-bottom: 16px; }
+.tac    { text-align: center; }
+.tar    { text-align: right; }
+.txt-sm { font-size: 11px; }
+.txt-md { font-size: 13px; }
+.txt-lg { font-size: 16px; }
+.txt-xl { font-size: 20px; }
+.txt-xxl{ font-size: 26px; }
+.bold   { font-weight: 700; }
+.dim    { color: var(--texto-2); }
+.acento { color: var(--acento); }
+.exito  { color: var(--exito); }
+.peligro{ color: var(--peligro); }
+.mono   { font-family: var(--ff-mono); }
+.hide   { display: none !important; }
+.divider { height: 1px; background: var(--borde); margin: 12px 0; }
+
+/* ── Plantillas Inteligentes ─────────────────────────────────── */
+.plantilla-chip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  background: var(--surface-2);
+  border: 1px solid var(--borde-2);
+  border-radius: var(--r-sm);
+  padding: 10px 12px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+.plantilla-chip:active { transform: scale(0.98); }
+.plantilla-chip.uso-alto { border-left: 3px solid var(--acento); }
+.plantilla-chip.uso-medio { border-left: 3px solid var(--info); }
+.plantilla-chip-texto {
+  flex: 1;
+  font-size: 13px;
+  color: var(--texto);
+  line-height: 1.4;
+  text-align: left;
+}
+.plantilla-chip-uso {
+  font-size: 10px;
+  color: var(--texto-2);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.plantilla-chip-del {
+  color: var(--peligro);
+  font-size: 16px;
+  padding: 2px 6px;
+  flex-shrink: 0;
+  opacity: 0.6;
+}
+.plantilla-chip-del:active { opacity: 1; }
+/* ════════════════════════════════════════════════════════════════
+   MANTENIMIENTOS PROGRAMADOS
+   ════════════════════════════════════════════════════════════════ */
+.mant-seccion {
+  margin: 12px 0;
+  padding: 12px;
+  background: var(--surface-2);
+  border: 1px solid var(--borde);
+  border-radius: var(--r);
+}
+
+.mant-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.mant-titulo {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--texto);
+}
+
+.mant-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 12px;
+  margin: 6px 0;
+  background: var(--surface);
+  border-radius: var(--r-sm, 8px);
+}
+
+.mant-item-main { flex: 1; min-width: 0; }
+
+.mant-item-cliente {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--texto);
+}
+
+.mant-item-venc {
+  margin-top: 2px;
+  font-weight: 600;
+}
+
+.mant-item-acciones {
+  display: flex;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.mant-item-acciones .btn {
+  padding: 6px 8px;
+  font-size: 13px;
+}
+
+/* ── Períodos de viaje (Config) ──────────────────────────── */
+.bp-viaje {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+  padding: 10px;
+  background: var(--surface);
+  border-radius: var(--r-sm, 8px);
+  margin-bottom: 8px;
+}
+.bp-fechas-row, .bp-gastos-row {
+  display: flex;
+  gap: 6px;
+}
+.bp-fechas-row input, .bp-gastos-row input, .bp-viaje .bp-zona {
+  flex: 1;
+  min-width: 0;
+}
+.bp-viaje .bp-remove {
+  align-self: flex-end;
+}
+
+/* ── Botón Maps y zona en tarjeta de turno ──────────────── */
+.turno-card-maps {
+  background: var(--surface-2);
+  border: 1px solid var(--borde);
+  color: var(--texto);
+  border-radius: 6px;
+  padding: 3px 8px;
+  font-size: 11px;
+  cursor: pointer;
+}
+.turno-card-maps:active { background: var(--acento); color: #000; }
+.turno-card-zona {
+  font-size: 11px;
+  color: var(--acento);
+  background: rgba(232,160,32,.12);
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+/* ── Módulo de Abonos ───────────────────────────────────── */
+#panel-abonos .kpi { flex:1; min-width:90px; background:var(--surface); border:1px solid var(--borde); border-radius:10px; padding:12px; text-align:center; }
+#panel-abonos .kpi-label { font-size:11px; color:var(--texto-2); text-transform:uppercase; letter-spacing:.5px; }
+#panel-abonos .kpi-valor { font-size:20px; font-weight:700; margin-top:4px; }
+#panel-abonos .kpi-valor.verde { color:var(--exito); }
+#panel-abonos .kpi-valor.rojo { color:var(--peligro); }
+.abono-seccion-titulo { padding:8px 16px; font-size:13px; color:var(--texto-2); text-transform:uppercase; letter-spacing:.5px; }
+.abono-card { background:var(--surface); border:1px solid var(--borde); border-radius:12px; margin:8px 14px; padding:14px; }
+.abono-card-top { display:flex; justify-content:space-between; align-items:flex-start; gap:10px; cursor:pointer; }
+.abono-nombre { font-size:16px; font-weight:600; }
+.abono-equipo { margin-top:2px; }
+.abono-cuota { font-size:16px; font-weight:700; color:var(--acento); white-space:nowrap; text-align:right; }
+.abono-cuota small { display:block; font-size:11px; color:var(--texto-2); font-weight:400; }
+.abono-estado { display:inline-block; padding:3px 10px; border-radius:20px; font-size:12px; font-weight:600; margin-top:8px; }
+.abono-estado.aldia { background:rgba(76,175,125,.15); color:var(--exito); }
+.abono-estado.debe { background:rgba(224,80,80,.15); color:var(--peligro); }
+.abono-estado.porvencer { background:rgba(232,160,32,.15); color:var(--acento); }
+.abono-detalle { margin-top:12px; padding-top:12px; border-top:1px solid var(--borde); display:none; }
+.abono-detalle.abierto { display:block; }
+.abono-detalle .row { display:flex; justify-content:space-between; padding:4px 0; font-size:14px; }
+.abono-acciones { display:flex; gap:8px; margin-top:12px; flex-wrap:wrap; }
+.abono-acciones .btn { flex:1; min-width:110px; }
+
+/* Badge "toca visita" en abono */
+.abono-visita-badge { font-size:11px; background:rgba(232,160,32,.18); color:var(--acento); padding:2px 7px; border-radius:10px; font-weight:600; }
+
+/* ── Flota de máquinas ──────────────────────────────────── */
+.flota-item { display:flex; align-items:center; gap:12px; background:var(--surface-2); border:1px solid var(--borde); border-radius:10px; padding:12px; margin-bottom:8px; }
+.flota-num { width:30px; height:30px; border-radius:8px; background:var(--acento); color:#000; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:14px; flex-shrink:0; }
+.flota-info { flex:1; }
+.flota-marca { font-weight:600; font-size:15px; }
+.flota-del { color:var(--peligro); font-size:18px; cursor:pointer; padding:4px 10px; background:transparent; border:none; }
+
+/* ── Checklist de mantenimiento ─────────────────────────── */
+.chk-maquina { background:var(--surface-2); border:1px solid var(--borde); border-radius:10px; padding:12px; margin-bottom:10px; }
+.chk-top { display:flex; align-items:center; gap:12px; }
+.chk-check { width:28px; height:28px; border-radius:7px; border:2px solid var(--borde); display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0; font-size:16px; background:var(--bg); font-weight:700; }
+.chk-check.marcado { background:var(--exito); border-color:var(--exito); color:#000; }
+.chk-info { flex:1; }
+.chk-marca { font-weight:600; font-size:15px; }
+.chk-estados { display:flex; gap:6px; margin-top:10px; }
+.chk-estado { flex:1; padding:7px; border-radius:7px; border:1px solid var(--borde); background:var(--bg); color:var(--texto-2); font-size:12px; font-weight:600; cursor:pointer; text-align:center; }
+.chk-estado.sel-ok { background:rgba(76,175,125,.18); border-color:var(--exito); color:var(--exito); }
+.chk-estado.sel-obs { background:rgba(232,160,32,.18); border-color:var(--acento); color:var(--acento); }
+.chk-estado.sel-baja { background:rgba(224,80,80,.18); border-color:var(--peligro); color:var(--peligro); }
+.chk-nota-baja { font-size:12px; color:var(--peligro); margin-top:8px; font-style:italic; }
+
+/* ── Por cobrar (Admin) ─────────────────────────────────── */
+.porcobrar-total { background:rgba(76,175,125,.1); border:1px solid var(--exito); border-radius:10px; padding:14px; margin-bottom:12px; text-align:center; }
+.porcobrar-total-label { font-size:12px; color:var(--texto-2); text-transform:uppercase; letter-spacing:.5px; }
+.porcobrar-total-monto { font-size:26px; font-weight:700; color:var(--exito); margin-top:4px; }
+.porcobrar-item { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:10px 0; border-bottom:1px solid var(--borde); }
+.porcobrar-item:last-child { border-bottom:none; }
+.porcobrar-item-info { flex:1; min-width:0; }
+.porcobrar-item-cliente { font-weight:600; font-size:14px; }
+.porcobrar-item-saldo { font-weight:700; color:var(--acento); white-space:nowrap; }
+
+/* Desglose por zona en Por cobrar */
+.porcobrar-zonas { margin-bottom:12px; padding:10px; background:var(--surface-2); border-radius:8px; }
+.porcobrar-zona { display:flex; justify-content:space-between; font-size:13px; padding:3px 0; color:var(--texto-2); }
+.porcobrar-zona span:last-child { color:var(--acento); font-weight:600; }
+
+/* ── Métricas del negocio ───────────────────────────────── */
+.metrica-kpis { display:flex; gap:10px; margin-bottom:14px; flex-wrap:wrap; }
+.metrica-kpi { flex:1; min-width:80px; background:var(--surface-2); border-radius:8px; padding:10px; text-align:center; }
+.metrica-kpi-num { font-size:22px; font-weight:700; color:var(--acento); }
+.metrica-kpi-lbl { font-size:11px; color:var(--texto-2); margin-top:2px; }
+.metrica-bloque { margin-top:12px; }
+.metrica-titulo { font-size:13px; font-weight:600; color:var(--texto-2); margin-bottom:6px; }
+.metrica-row { display:flex; justify-content:space-between; font-size:14px; padding:3px 0; border-bottom:1px solid var(--borde); }
+.metrica-val { font-weight:600; color:var(--acento); }
+
+/* ── Caja ───────────────────────────────────────────────── */
+.caja-grid { display:flex; gap:10px; flex-wrap:wrap; }
+.caja-bloque { flex:1; min-width:140px; background:var(--surface-2); border-radius:10px; padding:12px; }
+.caja-titulo { font-size:13px; font-weight:600; color:var(--texto-2); margin-bottom:8px; text-transform:uppercase; letter-spacing:.5px; }
+.caja-row { display:flex; justify-content:space-between; font-size:14px; padding:3px 0; }
+.caja-in { color:var(--exito); font-weight:600; }
+.caja-out { color:var(--peligro); font-weight:600; }
+.caja-neto { border-top:1px solid var(--borde); margin-top:4px; padding-top:6px; font-weight:700; }
+.flota-edit { color:var(--acento); font-size:16px; cursor:pointer; padding:4px 8px; background:transparent; border:none; }
+
+/* ── v7: Botón "Hoy" en la navegación ───────────────── */
+.agenda-btn-hoy {
+  margin-left: auto;
+  padding: 4px 14px !important;
+  font-weight: 700;
+}
+
+/* ── v7: Resumen de la semana ───────────────────────── */
+.agenda-resumen-semana {
+  margin: 0 14px 10px;
+  padding: 8px 12px;
+  background: var(--surface-2);
+  border-radius: 8px;
+  font-size: 13px;
+  color: var(--texto-dim);
+  text-align: center;
+}
+.agenda-resumen-semana b { color: var(--acento); }
+
+/* ── v7: Días vacíos compactos ──────────────────────── */
+.agenda-dia-vacio {
+  opacity: 0.55;
+}
+.agenda-dia-vacio .agenda-dia-head {
+  padding: 6px 12px;
+}
+.agenda-dia-vacio .agenda-dia-empty {
+  display: inline;
+  font-size: 11px;
+  padding: 0 0 6px 12px;
+  color: var(--texto-dim);
+}
+
+/* ── v7: Acceso rápido a Backup arriba de Config ────── */
+.cfg-backup-rapido {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0 0 14px;
+  padding: 12px 14px;
+  background: linear-gradient(135deg, #1e4fa8, #2d6cdf);
+  border-radius: 12px;
+  color: #fff;
+}
+.cfg-backup-rapido-titulo {
+  font-size: 15px;
+  font-weight: 700;
+}
+.cfg-backup-rapido .dim {
+  color: rgba(255,255,255,0.85) !important;
+}
+.cfg-backup-rapido .btn-primary {
+  background: #fff;
+  color: #1e4fa8;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.cfg-backup-alerta {
+  color: #ffd54f !important;
+  font-weight: 600;
+}
+
+/* ── v7: Botón "Generar trabajo" en la tarjeta del turno ── */
+.turno-card-generar {
+  background: var(--acento, #f5a623);
+  color: #1a1a1a;
+  border: none;
+  border-radius: 8px;
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.turno-card-generar:active { opacity: 0.85; }
