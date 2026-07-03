@@ -11,7 +11,7 @@
  *   - Soporte mensaje CLEAR_CACHE
  */
 
-const CACHE_VERSION = 'electromel-v7-4t';
+const CACHE_VERSION = 'electromel-v7-4v';
 const CDN_CACHE     = 'electromel-cdn-v1';
 
 const SHELL_ASSETS = [
@@ -130,8 +130,6 @@ const SHELL_ASSETS = [
   /* search service */
   './js/services/search/search.js',
   /* module indexes */
-  './js/modules/ing/index.js',
-  './js/modules/ott/index.js',
   './js/modules/agenda/index.js',
   /* virtual list component */
   './components/virtual-list/virtual-list.js',

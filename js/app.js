@@ -82,6 +82,9 @@ import * as viajesOpUI from './modules/viajes.op.ui.js';
 async function registerSW() {
   if (!('serviceWorker' in navigator)) return;
   try {
+    /* En el APK (Capacitor) NO se registra el SW: los archivos ya
+       van empaquetados adentro y un cache duplicado solo estorba. */
+    if (window.Capacitor?.isNativePlatform?.()) return;
     const reg = await navigator.serviceWorker.register('./sw.js', { scope: './' });
     console.log('[SW] Registrado, scope:', reg.scope);
     initSWUpdateBanner();

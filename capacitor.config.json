@@ -1,0 +1,8 @@
+{
+  "appId": "com.electromel.erp",
+  "appName": "ELECTROMEL",
+  "webDir": "www",
+  "android": {
+    "allowMixedContent": false
+  }
+}

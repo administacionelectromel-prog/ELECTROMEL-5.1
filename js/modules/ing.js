@@ -5,6 +5,7 @@
  * PDF A4, Ticket 57mm, Etiqueta, y la transición a OTT.
  */
 
+import { guardarPDF }               from '../services/files.js';
 import { store }                    from '../core/store.js';
 import { dbGet, dbPut, getNextNumber, peekNextNumber,
          getBaseForDate, getCfg, logEvent } from '../core/db.js';
@@ -693,7 +694,7 @@ export async function imprimirING_Ticket(numero) {
     const gr = doc.splitTextToSize('GRACIAS POR CONFIAR EN ELECTROMEL', iW);
     doc.text(gr, cx, y, { align: 'center' });
 
-    doc.save(`${numero}_ticket.pdf`);
+    guardarPDF(doc, `${numero}_ticket.pdf`);
     await logEvent(db, { type: 'PDF_GENERATED', message: 'ING ticket: ' + numero, ref: numero });
     showToast('🧾 Ticket generado', 'success');
   } catch(err) {
@@ -815,7 +816,7 @@ export async function imprimirING_Etiqueta(numero) {
       doc.text(mmL[0], infoX, y); y += 3.5;
     }
 
-    doc.save(`${numero}_etiqueta.pdf`);
+    guardarPDF(doc, `${numero}_etiqueta.pdf`);
     await logEvent(db, { type: 'PDF_GENERATED', message: 'ING etiqueta: ' + numero, ref: numero });
     showToast('🏷️ Etiqueta generada', 'success');
   } catch(err) {
