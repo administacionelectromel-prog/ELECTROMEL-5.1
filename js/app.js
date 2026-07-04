@@ -418,6 +418,8 @@ async function initModules(db) {
   try { initPlantillas();  } catch(e) { console.error('[initPlantillas]', e); }
   try { mantMod.initMantenimientos(); } catch(e) { console.error('[initMantenimientos]', e); }
   try { await initZonas(); } catch(e) { console.error('[initZonas]', e); }
+  try { const seg = await import('./services/seguridad.js'); seg.initSeguridad(); } catch(e) { console.error('[initSeguridad]', e); }
+  try { const not = await import('./services/notificaciones.js'); not.initNotificaciones(); } catch(e) { console.error('[initNotif]', e); }
   try { await initCiudadesCP(); } catch(e) { console.error('[initCiudadesCP]', e); }
 
   /* Migración de datos v14: NQN→SMA+zona, agregar año (una sola vez) */
@@ -469,7 +471,7 @@ async function boot() {
   }
 
   if (db) {
-    logEvent(db, { type: 'APP_START', message: 'ELECTROMEL ERP v7.4 iniciado' }).catch(()=>{});
+    logEvent(db, { type: 'APP_START', message: 'ELECTROMEL ERP v2.0 iniciado' }).catch(()=>{});
   }
 
   /* Mantenimiento diferido */
@@ -502,7 +504,7 @@ async function boot() {
     }
   }, true);
 
-  console.log('[ELECTROMEL] App v7.4 lista ✓');
+  console.log('[ELECTROMEL] App v2.0 lista ✓');
 
   /* Deep-link desde QR: #equipo=OTT-00005 abre la ficha del equipo */
   _procesarDeepLink();

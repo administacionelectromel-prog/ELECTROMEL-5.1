@@ -16,7 +16,7 @@ import { showToast, confirmarLindo } from '../core/ui.js';
 export const BACKUP_FORMAT  = 'electromel-backup';
 export const TRABAJO_FORMAT = 'electromel-trabajo';
 export const BACKUP_VERSION = 1;
-const APP_VERSION = '7.4';
+const APP_VERSION = '2.0';
 
 /* Stores respaldables = todos los del esquema (derivado, no lista manual) */
 export function storesRespaldables() {
@@ -201,6 +201,24 @@ export function importarBackup() {
 
 async function _restaurar(storesDump) {
   const db = store.get('db');
+
+  /* 🛟 Red de seguridad: backup de emergencia de los datos ACTUALES
+     antes de pisar nada. Si la restauración se interrumpiera a la
+     mitad, siempre existe el estado anterior en un archivo. */
+  try {
+    const emergencia = await generarBackupCompleto({ conFotos: true });
+    descargarJSON(emergencia.json, 'electromel_pre_restauracion_' +
+      new Date().toISOString().slice(0, 10) + '.json');
+    showToast('🛟 Backup de emergencia descargado', 'info');
+  } catch (e) {
+    console.warn('[restaurar] backup de emergencia falló', e);
+    const seguir = await confirmarLindo(
+      'No se pudo crear el backup de emergencia de los datos actuales. ¿Restaurar igual? (Se recomienda cancelar y exportar a mano primero.)',
+      { titulo: 'Sin red de seguridad', textoOk: 'Restaurar igual', peligro: true }
+    );
+    if (!seguir) { showToast('Restauración cancelada', 'info'); return; }
+  }
+
   showToast('Restaurando backup...', 'info');
   const reales    = Array.from(db.objectStoreNames);
   const conocidos = storesRespaldables();

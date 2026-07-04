@@ -11,7 +11,7 @@
  *   - Soporte mensaje CLEAR_CACHE
  */
 
-const CACHE_VERSION = 'electromel-v7-4v';
+const CACHE_VERSION = 'electromel-v2-0c';
 const CDN_CACHE     = 'electromel-cdn-v1';
 
 const SHELL_ASSETS = [
@@ -71,6 +71,8 @@ const SHELL_ASSETS = [
   './js/services/diagnostico.js',
   './js/services/backup.js',
   './js/services/files.js',
+  './js/services/seguridad.js',
+  './js/services/notificaciones.js',
   /* JS services/pdf */
   './js/services/pdf/base.js',
   './js/services/pdf/helpers.js',
@@ -125,10 +127,8 @@ const SHELL_ASSETS = [
   './js/modules/agenda/agenda.logger.js',
   './js/modules/agenda/agenda.types.js',
   /* core additions */
-  './js/core/queue.js',
   './js/core/logger.js',
   /* search service */
-  './js/services/search/search.js',
   /* module indexes */
   './js/modules/agenda/index.js',
   /* virtual list component */

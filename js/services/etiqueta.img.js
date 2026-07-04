@@ -46,6 +46,12 @@ function _descargarImagen(dataUrl, filename) {
 
 /* ── Enviar una imagen (dataURL) a impresión ────────────── */
 function _imprimirImagen(dataUrl, titulo) {
+  /* En el APK no hay ventanas: se comparte la imagen (desde el menú
+     se puede imprimir, guardar o mandar por WhatsApp). */
+  if (window.Capacitor?.isNativePlatform?.()) {
+    import('./files.js').then(f => f.descargarDataUrl(dataUrl, (titulo || 'imagen').replace(/\s+/g, '_') + '.jpg'));
+    return;
+  }
   const win = window.open('', '_blank');
   if (!win) {
     showToast('Permití las ventanas emergentes para imprimir', 'warn');

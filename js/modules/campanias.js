@@ -64,10 +64,11 @@ export async function borrarCampania(id) {
    Gastado = suma de campañas de ese canal. */
 export async function calcularMetricas() {
   const db = store.get('db');
-  const [ingresos, ordenes, campanias] = await Promise.all([
+  const [ingresos, ordenes, campanias, exteriors] = await Promise.all([
     dbGetAll(db, 'ingresos').catch(()=>[]),
     dbGetAll(db, 'ordenes').catch(()=>[]),
-    dbGetAll(db, 'campanias').catch(()=>[])
+    dbGetAll(db, 'campanias').catch(()=>[]),
+    dbGetAll(db, 'exteriors').catch(()=>[])
   ]);
 
   /* Facturado por número de ingreso (de las OTT) */
@@ -87,6 +88,18 @@ export async function calcularMetricas() {
     const row = ensure(o);
     row.clientes++;
     row.facturado += totalPorIngreso[ing.numero] || 0;
+  });
+
+  /* OTE directas (trabajo exterior concretado). Los turnos no cuentan
+     (son agenda) y los PRE tampoco: un presupuesto no es facturación —
+     su origen queda guardado y suma cuando el trabajo se concreta. */
+  (exteriors || []).forEach(e => {
+    if (e.es_turno) return;
+    const o = (e.origen_marketing || '').trim();
+    if (!o) return;
+    const row = ensure(o);
+    row.clientes++;
+    row.facturado += parseFloat(e.total) || 0;
   });
 
   (campanias || []).forEach(c => {

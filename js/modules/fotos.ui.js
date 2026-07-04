@@ -71,6 +71,11 @@ export async function _verFotoGrande(id) {
   const fotos = await fotosDeOrden(num).catch(() => []);
   const f = fotos.find(x => x.id === id);
   if (!f) return;
+  /* En el APK no hay pestañas: se comparte/guarda la foto */
+  if (window.Capacitor?.isNativePlatform?.()) {
+    import('../services/files.js').then(x => x.descargarDataUrl(f.dataUrl, (num || 'foto') + '_' + id + '.jpg'));
+    return;
+  }
   /* Abrir en nueva pestaña como fallback simple */
   const w = window.open('');
   if (w) w.document.write(`<img src="${f.dataUrl}" style="max-width:100%;">`);

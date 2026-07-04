@@ -140,6 +140,7 @@ export async function abrirFormularioOTE(preset = null) {
     set('ote-cliente-ciudad',   preset.cliente_ciudad);
     set('ote-cliente-cp',       preset.cliente_cp);
     set('ote-cliente-provincia',preset.cliente_provincia);
+    set('ote-origen-mkt',       preset.origen_marketing);
     set('ote-tipo-servicio',    preset.tipo_servicio);
     set('ote-equipo-marca',     preset.equipo_marca);
     set('ote-equipo-modelo',    preset.equipo_modelo);
@@ -165,7 +166,7 @@ export function cerrarFormularioOTE() {
 function _resetFormularioOTE() {
   [
     'ote-cliente-nombre','ote-cliente-cuit','ote-cliente-tel','ote-cliente-dir',
-    'ote-cliente-cp','ote-cliente-ciudad','ote-cliente-provincia',
+    'ote-cliente-cp','ote-cliente-ciudad','ote-cliente-provincia','ote-origen-mkt',
     'ote-tipo-servicio','ote-fecha','ote-numPresupuesto',
     'ote-equipo-marca','ote-equipo-modelo','ote-falla','ote-error',
     'ote-mano-obra','ote-viatico','ote-total',
@@ -226,6 +227,7 @@ function _readOTE() {
     cliente_cp:        v('ote-cliente-cp'),
     cliente_ciudad:    v('ote-cliente-ciudad'),
     cliente_provincia: v('ote-cliente-provincia'),
+    origen_marketing:  v('ote-origen-mkt') || '',
     tipo_servicio:     tipoServicio,
     equipo_marca:      v('ote-equipo-marca'),
     equipo_modelo:     v('ote-equipo-modelo'),

@@ -6,7 +6,7 @@
  */
 
 import { store, bus }        from '../core/store.js';
-import { dbGet, dbGetAll, dbDelete, getCfg, setCfg, logEvent, invalidateCache } from '../core/db.js';
+import { dbGet, dbGetAll, dbPut, dbDelete, getCfg, setCfg, logEvent, invalidateCache } from '../core/db.js';
 import { showToast, confirmarLindo } from '../core/ui.js';
 import { pesos, escapeHtml, fmtFechaCorta, getDiasDesde, fechaHoy } from '../core/utils.js';
 import { BUSINESS_CONFIG }    from '../core/config.js';
@@ -347,12 +347,35 @@ export async function borrarMovimientoCaja(txnId) {
     const mov = await dbGet(db, 'finance_movements', txnId);
     if (!mov) { showToast('Movimiento no encontrado', 'warn'); return; }
     const signo = mov.type === 'income' ? '+' : '-';
+    const esPagoOrden = mov.type === 'income' && mov.related_order_id;
     const ok = await confirmarLindo(
-      `¿Borrar este movimiento de la caja?\n\n${mov.description || mov.category || mov.type}\n${signo}${pesos(mov.amount)}`,
+      `¿Borrar este movimiento de la caja?\n\n${mov.description || mov.category || mov.type}\n${signo}${pesos(mov.amount)}` +
+      (esPagoOrden ? `\n\nTambién se quita del historial de pagos de ${mov.related_order_id}.` : ''),
       { titulo: 'Borrar movimiento', textoOk: 'Borrar', peligro: true }
     );
     if (!ok) return;
     await dbDelete(db, 'finance_movements', txnId);
+
+    /* Sincronizar: los pagos también viven en r.pagos de la orden
+       (la ficha y Por Cobrar leen ese array). Quitar la entrada espejo
+       para que caja y ficha sigan mostrando lo mismo. */
+    if (esPagoOrden) {
+      try {
+        const pref  = mov.related_order_id.slice(0, 3);
+        const stNom = ({ OTT: 'ordenes', OTE: 'exteriors', ING: 'ingresos', PRE: 'presupuestos' })[pref];
+        const orden = stNom ? await dbGet(db, stNom, mov.related_order_id) : null;
+        if (orden && Array.isArray(orden.pagos)) {
+          const idx = orden.pagos.findIndex(p =>
+            (parseFloat(p.monto) || 0) === (parseFloat(mov.amount) || 0) &&
+            (!mov.date || !p.fecha || p.fecha === mov.date));
+          if (idx >= 0) {
+            orden.pagos.splice(idx, 1);
+            await dbPut(db, stNom, orden);
+          }
+        }
+      } catch (e) { console.warn('[borrarMov] sync pagos', e); }
+    }
+
     await logEvent(db, { type: 'MOV_DELETED', message: 'Movimiento borrado: ' + (mov.description||txnId), ref: mov.related_order_id || txnId }).catch(()=>{});
     invalidateCache();
     showToast('✓ Movimiento borrado', 'success');

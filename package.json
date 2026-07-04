@@ -1,12 +1,13 @@
 {
   "name": "electromel-erp",
-  "version": "7.4.0",
+  "version": "2.0.0",
   "private": true,
   "description": "ELECTROMEL ERP — PWA + APK Android (Capacitor). El código web es la única fuente; el APK se compila con GitHub Actions o localmente con Android Studio.",
   "dependencies": {
     "@capacitor/android": "^6.1.0",
     "@capacitor/core": "^6.1.0",
     "@capacitor/filesystem": "^6.0.0",
+    "@capacitor/local-notifications": "^6.0.0",
     "@capacitor/share": "^6.0.0"
   },
   "devDependencies": {

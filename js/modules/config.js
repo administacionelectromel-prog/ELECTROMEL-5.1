@@ -498,6 +498,14 @@ function _buildConfigPanel() {
         </div>
       </div>
     </div>
+    <div class="card" id="notif-card">
+      <div class="card-title">🔔 Recordatorios de turnos</div>
+      <div class="dim txt-sm">Cargando…</div>
+    </div>
+    <div class="card" id="seguridad-card">
+      <div class="card-title">🔑 Modo Maestro</div>
+      <div class="dim txt-sm">Cargando…</div>
+    </div>
     <div class="card">
       <div class="card-title">🩺 Diagnóstico de la base</div>
       <div class="dim txt-xs" style="margin-bottom:8px;">Verifica stores, índices, conteos y consistencia. Solo lectura: no modifica nada. Recomendado antes de exportar un backup.</div>
@@ -668,7 +676,7 @@ function _buildConfigPanel() {
     <!-- ── INFORMACIÓN DEL SISTEMA ─────────────────────── -->
     <div class="cfg-section" data-cfg-title="ℹ️ Información del sistema">
       <div class="dim txt-sm">Próximos números: <span id="info-next-ing">—</span> · <span id="info-next-ott">—</span> · <span id="info-next-ote">—</span> · <span id="info-next-pre">—</span></div>
-      <div class="dim txt-sm" style="margin-top:4px;">App versión: <span id="info-app-version">7.4</span></div>
+      <div class="dim txt-sm" style="margin-top:4px;">App versión: <span id="info-app-version">2.0</span></div>
       <div class="dim txt-sm" style="margin-top:4px;">DB versión: <span id="info-db-version">${DB_VERSION}</span></div>
     </div>
 
@@ -748,5 +756,9 @@ export function initConfig() {
     import('../services/diagnostico.js').catch(() => {});
     /* Cargar servicio de backup (define exportarTrabajoUI) */
     import('../services/backup.js').catch(() => {});
+    /* Card de Modo Maestro */
+    import('../services/seguridad.js').then(m => m.renderSeguridadCard()).catch(() => {});
+    /* Card de notificaciones */
+    import('../services/notificaciones.js').then(m => m.renderNotifCard()).catch(() => {});
   });
 }

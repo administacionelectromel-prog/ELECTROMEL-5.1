@@ -10,7 +10,25 @@ import { escapeHtml }        from '../core/utils.js';
 
 /* ── Normalización interna ──────────────────────────────── */
 function _normalizarData(data) {
-  if (!data || !data.nombre) return null;
+  if (!data) return null;
+
+  /* Aceptar ambos formatos: { nombre, telefono, ... } o el objeto
+     crudo de un ingreso/orden { cliente_nombre, cliente_telefono, ... }.
+     (ING y OTT pasan el objeto crudo: sin este mapeo, el cliente
+     nunca se indexaba y no aparecía en el autocompletado.) */
+  if (!data.nombre && data.cliente_nombre) {
+    data = {
+      nombre:    data.cliente_nombre,
+      cuit:      data.cliente_cuit,
+      telefono:  data.cliente_telefono,
+      direccion: data.cliente_direccion,
+      cp:        data.cliente_cp,
+      ciudad:    data.cliente_ciudad,
+      provincia: data.cliente_provincia
+    };
+  }
+
+  if (!data.nombre) return null;
   const nombre = String(data.nombre).trim();
   if (!nombre) return null;
 

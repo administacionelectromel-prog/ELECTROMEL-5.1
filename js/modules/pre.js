@@ -237,6 +237,7 @@ export async function abrirEdicionPRE(numero) {
     v('pre-cliente-cp',       pre.cliente_cp);
     v('pre-cliente-ciudad',   pre.cliente_ciudad);
     v('pre-cliente-provincia', pre.cliente_provincia);
+    v('pre-origen-mkt',        pre.origen_marketing);
     v('pre-tipo-servicio',    pre.tipo_servicio);
     v('pre-equipo-modelo',    pre.equipo_modelo);
     v('pre-problema',         pre.problema);
@@ -286,7 +287,7 @@ export async function abrirEdicionPRE(numero) {
 function _resetFormularioPRE() {
   [
     'pre-cliente-nombre','pre-cliente-cuit','pre-cliente-tel','pre-cliente-dir',
-    'pre-cliente-cp','pre-cliente-ciudad','pre-cliente-provincia',
+    'pre-cliente-cp','pre-cliente-ciudad','pre-cliente-provincia','pre-origen-mkt',
     'pre-tipo-servicio','pre-equipo-modelo','pre-problema','pre-fecha',
     'pre-mano-obra','pre-viatico','pre-total',
     'pre-descripcion','pre-nota-importante','pre-tiempo','pre-descuento'
@@ -359,6 +360,7 @@ function _readPRE() {
     cliente_cp:        v('pre-cliente-cp'),
     cliente_ciudad:    v('pre-cliente-ciudad'),
     cliente_provincia: v('pre-cliente-provincia'),
+    origen_marketing:  v('pre-origen-mkt') || '',
     tipo_servicio:     tipo,
     equipo_modelo:     v('pre-equipo-modelo'),
     problema:          v('pre-problema'),

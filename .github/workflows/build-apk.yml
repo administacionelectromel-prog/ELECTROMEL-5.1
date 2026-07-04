@@ -12,6 +12,8 @@ permissions:
 jobs:
   apk:
     runs-on: ubuntu-latest
+    env:
+      VERSION: 2.0.${{ github.run_number }}
     steps:
       - name: Descargar el código
         uses: actions/checkout@v4
@@ -39,17 +41,37 @@ jobs:
             --exclude 'node_modules' \
             --exclude '.git' \
             --exclude '.github' \
+            --exclude '*.md' \
+            --exclude '.gitignore' \
+            --exclude 'package.json' \
+            --exclude 'package-lock.json' \
+            --exclude 'capacitor.config.json' \
             ./ www/
 
       - name: Crear proyecto Android
         run: npx cap add android
 
+      - name: Permisos nativos (cámara para QR y fotos)
+        run: |
+          M=android/app/src/main/AndroidManifest.xml
+          sed -i 's|<uses-permission android:name="android.permission.INTERNET" />|<uses-permission android:name="android.permission.INTERNET" />\n    <uses-permission android:name="android.permission.CAMERA" />\n    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />\n    <uses-feature android:name="android.hardware.camera" android:required="false" />|' $M
+          echo "Permisos en el Manifest:" && grep -c "uses-permission" $M
+
+      - name: Ícono y pantalla de arranque (logo ELECTROMEL)
+        continue-on-error: true
+        run: |
+          mkdir -p resources
+          convert icons/icon-512.png -resize 1024x1024 resources/icon.png
+          convert -size 2732x2732 xc:'#0d1117' \( icons/icon-512.png -resize 1200x1200 \) -gravity center -composite resources/splash.png
+          cp resources/splash.png resources/splash-dark.png
+          npx @capacitor/assets generate --android
+
       - name: Sincronizar web y plugins
         run: npx cap sync android
 
-      - name: Versionar APK (7.4 + número de build)
+      - name: Versionar APK (2.0.N)
         run: |
-          sed -i 's/versionName "1.0"/versionName "7.4"/' android/app/build.gradle
+          sed -i "s/versionName \"1.0\"/versionName \"${VERSION}\"/" android/app/build.gradle
           sed -i "s/versionCode 1/versionCode ${{ github.run_number }}/" android/app/build.gradle
 
       - name: Compilar APK (debug)
@@ -59,18 +81,19 @@ jobs:
           ./gradlew assembleDebug
 
       - name: Renombrar APK
-        run: cp android/app/build/outputs/apk/debug/app-debug.apk ELECTROMEL.apk
+        run: cp android/app/build/outputs/apk/debug/app-debug.apk "ELECTROMEL-${VERSION}.apk"
 
       - name: Guardar como artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ELECTROMEL-apk
-          path: ELECTROMEL.apk
+          name: ELECTROMEL-${{ env.VERSION }}
+          path: ELECTROMEL-${{ env.VERSION }}.apk
 
       - name: Publicar como Release (descarga fácil desde el celular)
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: apk
-          name: "📱 ELECTROMEL — APK (última compilación)"
-          body: "APK generado automáticamente desde el código del repo. Descargalo e instalalo (Android va a pedir permitir 'orígenes desconocidos'). Cada compilación reemplaza a la anterior."
-          files: ELECTROMEL.apk
+          tag_name: v${{ env.VERSION }}
+          name: "📱 ELECTROMEL ${{ env.VERSION }}"
+          make_latest: true
+          body: "Descargá el APK e instalalo encima de la versión anterior (los datos se conservan). Todas las versiones quedan guardadas: si alguna diera problemas, volvé a instalar la anterior desde Releases."
+          files: ELECTROMEL-${{ env.VERSION }}.apk
