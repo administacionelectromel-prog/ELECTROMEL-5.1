@@ -84,6 +84,8 @@ export function buildTurnoFormHTML() {
         <option value="Máquina Gym">Máquina Gym</option>
         <option value="Cinta de Correr">Cinta de Correr</option>
         <option value="Máquina Eléctrica">Máquina Eléctrica</option>
+        <option value="Cortadora Plasma">Cortadora Plasma</option>
+        <option value="Herramienta Eléctrica">Herramienta Eléctrica</option>
         <option value="Servicio de Urgencia">Servicio de Urgencia</option>
         <option value="Instalaciones Eléctricas">Instalaciones Eléctricas</option>
         <option value="Mantenimiento">Mantenimiento</option>

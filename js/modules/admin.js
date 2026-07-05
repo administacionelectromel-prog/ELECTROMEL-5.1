@@ -240,7 +240,12 @@ export async function renderAdminAsistente() {
     const malos   = cerrado.filter(r => r.es_mala_decision);
     if (malos.length) recos.push({ icon:'⚠️', texto:`${malos.length} trabajo(s) con ganancia bajo el mínimo.` });
 
-    const abiertos = rentab.filter(r => !r.cerrado);
+    /* Trabajos realmente en curso: solo OTT/OTE sin cerrar.
+       Se excluyen los ingresos (ING: son equipos esperando OTT, no
+       trabajos) y los presupuestos (PRE: aún no son trabajo). Antes
+       se contaba todo lo no-cerrado y el número se inflaba. */
+    const abiertos = rentab.filter(r =>
+      !r.cerrado && (r.tipo === 'OTT' || r.tipo === 'OTE'));
     if (abiertos.length > 10) recos.push({ icon:'🔄', texto:`${abiertos.length} trabajos abiertos. Cerrá los entregados.` });
 
     const rk = await calcularRankings();

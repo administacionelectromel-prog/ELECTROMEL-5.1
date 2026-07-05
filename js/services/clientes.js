@@ -168,15 +168,21 @@ export async function buscarClientes(termino, limit = 8) {
   const db = store.get('db');
   if (!db || !termino || termino.length < 2) return [];
 
-  const t      = termino.trim().toLowerCase();
+  /* Comparación insensible a tildes/ñ: "gomez" encuentra "Gómez",
+     "muñoz" y "munoz" se encuentran entre sí. Se normaliza al vuelo
+     en ambos lados: no requiere reindexar nada. */
+  const sinAcentos = s => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
+  const t      = sinAcentos(termino.trim().toLowerCase());
   const tDigits = termino.replace(/\D/g, '');
   const todos  = await dbGetAll(db, 'clientes');
   const matches = [];
 
   for (const c of todos) {
     let score = 0;
-    if (c.nombre_lower?.startsWith(t))          score = 100;
-    else if (c.nombre_lower?.includes(t))        score = 50;
+    const nl = sinAcentos(c.nombre_lower || '');
+    if (nl.startsWith(t))          score = 100;
+    else if (nl.includes(t))        score = 50;
     if (tDigits && c.cuit?.includes(tDigits))     score = Math.max(score, 80);
     if (tDigits && c.telefono_normalizado?.includes(tDigits)) score = Math.max(score, 70);
     if (score > 0) matches.push({ c, score });
