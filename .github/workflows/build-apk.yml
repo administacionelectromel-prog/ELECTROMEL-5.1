@@ -57,27 +57,27 @@ jobs:
           sed -i 's|<uses-permission android:name="android.permission.INTERNET" />|<uses-permission android:name="android.permission.INTERNET" />\n    <uses-permission android:name="android.permission.CAMERA" />\n    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />\n    <uses-feature android:name="android.hardware.camera" android:required="false" />|' $M
           echo "Permisos en el Manifest:" && grep -c "uses-permission" $M
 
-      - name: Ícono y pantalla de arranque (logo ELECTROMEL)
+      - name: Ícono (logo ELECTROMEL) — sin dependencias externas
         run: |
           RES=android/app/src/main/res
-          # Capacitor deja un ícono ADAPTATIVO (XML + capas foreground/background)
-          # que TAPA el PNG del logo. Hay que borrar esos XML y capas para que
-          # Android use directamente nuestro ic_launcher.png.
-          rm -rf $RES/mipmap-anydpi-v26
-          find $RES -name 'ic_launcher_foreground.*' -delete
-          find $RES -name 'ic_launcher_background.*' -delete
-          find $RES -path '*values*' -name 'ic_launcher_background.xml' -delete
-          # Estampar el logo en todos los tamaños (PNG directo, sin capas)
-          for par in mdpi:48 hdpi:72 xhdpi:96 xxhdpi:144 xxxhdpi:192; do
-            d=${par%%:*}; s=${par##*:}
-            mkdir -p $RES/mipmap-$d
-            convert icons/icon-512.png -resize ${s}x${s} $RES/mipmap-$d/ic_launcher.png
-            cp $RES/mipmap-$d/ic_launcher.png $RES/mipmap-$d/ic_launcher_round.png
+          # Capacitor deja un ícono ADAPTATIVO (XML + capas) que TAPA el PNG.
+          # Se borran esos XML/capas para que Android use nuestro logo.
+          # El '|| true' evita que un borrado inexistente tumbe el paso.
+          rm -rf "$RES/mipmap-anydpi-v26" || true
+          find "$RES" -name 'ic_launcher_foreground.*' -delete 2>/dev/null || true
+          find "$RES" -name 'ic_launcher_background.*' -delete 2>/dev/null || true
+          # Copiar el ícono del TAMAÑO JUSTO para cada densidad (ya
+          # generados en icons/). Nítido y sin ImageMagick.
+          declare -A ICON=( [mdpi]=72 [hdpi]=72 [xhdpi]=96 [xxhdpi]=144 [xxxhdpi]=192 )
+          for d in mdpi hdpi xhdpi xxhdpi xxxhdpi; do
+            mkdir -p "$RES/mipmap-$d"
+            SRC="icons/icon-${ICON[$d]}.png"
+            [ -f "$SRC" ] || SRC="icons/icon-512.png"
+            cp "$SRC" "$RES/mipmap-$d/ic_launcher.png"
+            cp "$SRC" "$RES/mipmap-$d/ic_launcher_round.png"
           done
-          # Pantalla de arranque: fondo oscuro con el logo centrado
-          convert -size 1080x1920 xc:'#0d1117' \( icons/icon-512.png -resize 512x512 \) -gravity center -composite /tmp/splash.png
-          find $RES -name 'splash.png' -exec cp /tmp/splash.png {} \;
-          echo "Íconos aplicados:" && ls $RES/mipmap-xxxhdpi/
+          echo "Ícono aplicado. Contenido de mipmap-xxxhdpi:"
+          ls "$RES/mipmap-xxxhdpi/" || true
 
       - name: Sincronizar web y plugins
         run: npx cap sync android
