@@ -58,13 +58,26 @@ jobs:
           echo "Permisos en el Manifest:" && grep -c "uses-permission" $M
 
       - name: Ícono y pantalla de arranque (logo ELECTROMEL)
-        continue-on-error: true
         run: |
-          mkdir -p resources
-          convert icons/icon-512.png -resize 1024x1024 resources/icon.png
-          convert -size 2732x2732 xc:'#0d1117' \( icons/icon-512.png -resize 1200x1200 \) -gravity center -composite resources/splash.png
-          cp resources/splash.png resources/splash-dark.png
-          npx @capacitor/assets generate --android
+          RES=android/app/src/main/res
+          # Capacitor deja un ícono ADAPTATIVO (XML + capas foreground/background)
+          # que TAPA el PNG del logo. Hay que borrar esos XML y capas para que
+          # Android use directamente nuestro ic_launcher.png.
+          rm -rf $RES/mipmap-anydpi-v26
+          find $RES -name 'ic_launcher_foreground.*' -delete
+          find $RES -name 'ic_launcher_background.*' -delete
+          find $RES -path '*values*' -name 'ic_launcher_background.xml' -delete
+          # Estampar el logo en todos los tamaños (PNG directo, sin capas)
+          for par in mdpi:48 hdpi:72 xhdpi:96 xxhdpi:144 xxxhdpi:192; do
+            d=${par%%:*}; s=${par##*:}
+            mkdir -p $RES/mipmap-$d
+            convert icons/icon-512.png -resize ${s}x${s} $RES/mipmap-$d/ic_launcher.png
+            cp $RES/mipmap-$d/ic_launcher.png $RES/mipmap-$d/ic_launcher_round.png
+          done
+          # Pantalla de arranque: fondo oscuro con el logo centrado
+          convert -size 1080x1920 xc:'#0d1117' \( icons/icon-512.png -resize 512x512 \) -gravity center -composite /tmp/splash.png
+          find $RES -name 'splash.png' -exec cp /tmp/splash.png {} \;
+          echo "Íconos aplicados:" && ls $RES/mipmap-xxxhdpi/
 
       - name: Sincronizar web y plugins
         run: npx cap sync android
