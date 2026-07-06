@@ -170,7 +170,6 @@ export async function renderSeguridadCard() {
 
   if (!activo) {
     cont.innerHTML = `
-      <div class="card-title">🔑 Modo Maestro</div>
       <div class="dim txt-xs" style="margin-bottom:8px;">Protegé Config y Admin (backup, exportaciones, estadísticas) con un PIN. El uso diario del taller queda libre. El PIN se guarda cifrado, nunca en texto plano.</div>
       <input type="password" id="seg-nuevo1" inputmode="numeric" placeholder="Nuevo PIN (mín. 4)" style="width:100%;background:var(--surface-2);border:1px solid var(--borde-2);border-radius:8px;padding:9px;color:var(--texto);font-size:14px;margin-bottom:6px;">
       <input type="password" id="seg-nuevo2" inputmode="numeric" placeholder="Repetir PIN" style="width:100%;background:var(--surface-2);border:1px solid var(--borde-2);border-radius:8px;padding:9px;color:var(--texto);font-size:14px;margin-bottom:6px;">
@@ -178,7 +177,6 @@ export async function renderSeguridadCard() {
       <button class="btn btn-primary btn-block btn-sm" type="button" onclick="segCrear()">🔑 Activar Modo Maestro</button>`;
   } else {
     cont.innerHTML = `
-      <div class="card-title">🔑 Modo Maestro</div>
       <div class="ok txt-sm" style="margin-bottom:8px;">✅ Protección activa — Config y Admin piden PIN.</div>
       <button class="btn btn-ghost btn-block btn-sm" type="button" onclick="segBloquearAhora()" style="margin-bottom:6px;">🔒 Bloquear ahora</button>
       <button class="btn btn-ghost btn-block btn-sm" type="button" onclick="segQuitar()">Quitar protección (pide PIN)</button>`;

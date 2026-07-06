@@ -11,7 +11,7 @@ import { showToast }        from '../../core/ui.js';
 import { getJsPDF, cargarDatosEmpresa, getCondicionesServicio } from './base.js';
 import {
   pdfHeaderA4, pdfPieA4, pdfCheckSpace,
-  pdfSectionBanner, pdfDatosCliente, pdfLineaCampo,
+  pdfSectionBanner, pdfDatosCliente, pdfLineaCampo, pdfLineaCampoDoble,
   pdfBloqueFirmas, pdfCondiciones
 } from './helpers.js';
 
@@ -50,11 +50,13 @@ export async function imprimirING_A4(numero) {
     /* Datos del equipo */
     y = pdfSectionBanner(doc, y, 'DATOS DEL EQUIPO');
     doc.setFontSize(9);
-    y = pdfLineaCampo(doc, y, 'Equipo',       ing.equipo_tipo || '—');
-    y = pdfLineaCampo(doc, y, 'Marca/Modelo', [ing.equipo_marca, ing.equipo_modelo].filter(Boolean).join(' ') || '—');
+    y = pdfLineaCampoDoble(doc, y,
+      'Equipo', ing.equipo_tipo || '—',
+      'Marca/Modelo', [ing.equipo_marca, ing.equipo_modelo].filter(Boolean).join(' ') || '—');
     if (ing.equipo_serie) y = pdfLineaCampo(doc, y, 'N° de serie', ing.equipo_serie);
-    y = pdfLineaCampo(doc, y, 'Falla declarada', ing.equipo_falla  || '—');
-    y = pdfLineaCampo(doc, y, 'Error declarado',  ing.equipo_error || 'Sin código');
+    y = pdfLineaCampoDoble(doc, y,
+      'Falla declarada', ing.equipo_falla || '—',
+      'Error declarado', ing.equipo_error || 'Sin código');
     y += 2;
 
     /* Encomienda entrada */

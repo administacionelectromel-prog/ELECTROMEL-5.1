@@ -113,13 +113,24 @@ export async function upsertCliente(data, origenNumero) {
         cambios = true;
       }
 
-      /* Historial de trabajos */
+      /* Historial de trabajos — deduplicado a prueba de balas.
+         Se normaliza el número (mayúsculas, sin espacios) y se
+         reconstruye el array como conjunto único: correr el
+         reindexado N veces deja SIEMPRE el mismo resultado. */
       if (origenNumero) {
-        existente.historial = existente.historial || [];
-        if (!existente.historial.includes(origenNumero)) {
-          existente.historial.unshift(origenNumero);
+        const num = String(origenNumero).trim().toUpperCase();
+        if (num) {
+          const prev = Array.isArray(existente.historial) ? existente.historial : [];
+          const set  = new Set(prev.map(x => String(x).trim().toUpperCase()));
+          if (!set.has(num)) {
+            set.add(num);
+            cambios = true;
+          } else if (prev.length !== set.size) {
+            /* Ya estaba, pero había duplicados viejos → limpiar igual */
+            cambios = true;
+          }
+          existente.historial      = [num, ...[...set].filter(x => x !== num)];
           existente.trabajos_count = existente.historial.length;
-          cambios = true;
         }
       }
 
@@ -332,6 +343,20 @@ export async function reindexarClientes() {
   let antes = 0;
 
   try { antes = (await dbGetAll(db, 'clientes', false)).length; } catch(e) {}
+
+  /* Limpiar historiales existentes: se reconstruyen de cero desde las
+     órdenes reales. Así el reindexado corrige cualquier duplicado
+     previo (correrlo varias veces siempre deja el resultado correcto). */
+  try {
+    const clientes = await dbGetAll(db, 'clientes', false);
+    for (const c of clientes) {
+      if (c.historial?.length || c.trabajos_count) {
+        c.historial = [];
+        c.trabajos_count = 0;
+        await dbPut(db, 'clientes', c);
+      }
+    }
+  } catch(e) { console.warn('[reindex] limpieza historial', e); }
 
   for (const st of stores) {
     let registros = [];

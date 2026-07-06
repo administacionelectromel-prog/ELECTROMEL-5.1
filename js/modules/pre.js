@@ -471,7 +471,31 @@ function _abrirConfirmacionPRE(numero, data) {
         <div class="row-sb"><span class="dim txt-sm">Total</span><span class="bold">${pesos(data.total)}</span></div>
       </div>
       <button class="btn btn-ghost btn-block btn-sm" type="button" onclick="imprimirPRE_A4('${escapeHtml(numero)}')">🖨️ PDF Presupuesto</button>
+      <button class="btn btn-success btn-block btn-sm" type="button" onclick="whatsappPREGuardado('${escapeHtml(numero)}')">💬 Enviar WhatsApp</button>
       ${tieneLista ? `<button class="btn btn-ghost btn-block btn-sm" type="button" onclick="imprimirPRE_ListaMateriales('${escapeHtml(numero)}')">📋 Lista materiales cliente</button>` : ''}`;
   }
+  /* Datos para WhatsApp */
+  try {
+    window.__preGuardado = {
+      numero,
+      cliente_nombre:   data.cliente_nombre || '',
+      cliente_telefono: data.cliente_telefono || '',
+      servicio:         data.tipo_servicio || '',
+      total:            parseFloat(data.total) || 0
+    };
+  } catch(e) {}
   ok.classList.add('active');
 }
+
+/* WhatsApp desde la confirmación de PRE recién guardado */
+window.whatsappPREGuardado = async (numero) => {
+  const g = window.__preGuardado || {};
+  let msg = `Hola ${g.cliente_nombre || ''}! Te paso el presupuesto ${numero} de ELECTROMEL.`;
+  if (g.servicio)  msg += `\n\nServicio: ${g.servicio}`;
+  if (g.total > 0) msg += `\nTotal presupuestado: $${(g.total).toLocaleString('es-AR')}`;
+  msg += `\n\nCualquier duda quedo a disposición. ¡Gracias!`;
+  try {
+    const { openWhatsApp } = await import('../services/whatsapp.js');
+    openWhatsApp(g.cliente_telefono, msg);
+  } catch(e) { console.warn('[whatsappPREGuardado]', e); showToast('No se pudo abrir WhatsApp', 'error'); }
+};

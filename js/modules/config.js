@@ -484,8 +484,7 @@ function _buildConfigPanel() {
       </div>
       <button class="btn btn-primary btn-sm" type="button" onclick="exportarBackup()">📥 Exportar ahora</button>
     </div>
-    <div class="card">
-      <div class="card-title">💾 Opciones de backup</div>
+    <div class="cfg-section" data-cfg-title="💾 Opciones de backup">
       <label class="row center txt-sm" style="gap:8px;margin:6px 0;cursor:pointer;">
         <input type="checkbox" id="cfg-backup-fotos" checked> Incluir fotos en el backup completo
       </label>
@@ -498,16 +497,17 @@ function _buildConfigPanel() {
         </div>
       </div>
     </div>
-    <div class="card" id="notif-card">
-      <div class="card-title">🔔 Recordatorios de turnos</div>
-      <div class="dim txt-sm">Cargando…</div>
+    <div class="cfg-section" data-cfg-title="🔔 Recordatorios de turnos">
+      <div id="notif-card">
+        <div class="dim txt-sm">Cargando…</div>
+      </div>
     </div>
-    <div class="card" id="seguridad-card">
-      <div class="card-title">🔑 Modo Maestro</div>
-      <div class="dim txt-sm">Cargando…</div>
+    <div class="cfg-section" data-cfg-title="🔑 Modo Maestro">
+      <div id="seguridad-card">
+        <div class="dim txt-sm">Cargando…</div>
+      </div>
     </div>
-    <div class="card">
-      <div class="card-title">🩺 Diagnóstico de la base</div>
+    <div class="cfg-section" data-cfg-title="🩺 Diagnóstico de la base">
       <div class="dim txt-xs" style="margin-bottom:8px;">Verifica stores, índices, conteos y consistencia. Solo lectura: no modifica nada. Recomendado antes de exportar un backup.</div>
       <button class="btn btn-ghost btn-block btn-sm" type="button" onclick="correrDiagnostico()">🩺 Analizar base</button>
       <div id="diag-resultado"></div>
@@ -552,6 +552,7 @@ function _buildConfigPanel() {
 
     <!-- ── BANCO ───────────────────────────────────────── -->
     <div class="cfg-section" data-cfg-title="🏦 Datos bancarios">
+      <div class="field"><label class="field-label">Titular de la cuenta</label><input type="text" id="cfg-banco-titular" placeholder="A nombre de quién está la cuenta"></div>
       <div class="field"><label class="field-label">Banco</label><input type="text" id="cfg-banco-nombre" placeholder="Nombre del banco"></div>
       <div class="field"><label class="field-label">Alias</label><input type="text" id="cfg-banco-alias"></div>
       <div class="field"><label class="field-label">CBU</label><input type="text" id="cfg-banco-cbu"></div>
@@ -668,9 +669,12 @@ function _buildConfigPanel() {
       <div class="dim txt-sm" style="margin-bottom:6px;">Las fotos se respaldan por separado (son pesadas). Guardá los dos archivos para tener todo.</div>
       <button class="btn btn-ghost btn-block btn-sm" type="button" onclick="exportarBackupFotos()">📷 Exportar fotos</button>
       <button class="btn btn-ghost btn-block btn-sm" type="button" onclick="importarBackupFotos()" style="margin-top:6px;">📷 Restaurar fotos</button>
-      <div class="divider" style="margin:10px 0;"></div>
-      <div class="dim txt-sm" style="margin-bottom:6px;">Si clientes antiguos no aparecen al buscar, reconstruí el índice de clientes desde las órdenes existentes.</div>
-      <button class="btn btn-ghost btn-block" type="button" onclick="reindexarClientesUI()">🔄 Reconstruir índice de clientes</button>
+    </div>
+
+    <!-- ── CLIENTES ─────────────────────────────────────── -->
+    <div class="cfg-section" data-cfg-title="👥 Clientes">
+      <div class="dim txt-sm" style="margin-bottom:8px;">Si al cargar un ingreso no te aparecen clientes que ya tenés, tocá acá: reconstruye la lista de clientes a partir de todos tus ingresos y órdenes. Es seguro y no borra nada.</div>
+      <button class="btn btn-primary btn-block" type="button" onclick="reindexarClientesUI()">🔄 Reconstruir lista de clientes</button>
     </div>
 
     <!-- ── INFORMACIÓN DEL SISTEMA ─────────────────────── -->

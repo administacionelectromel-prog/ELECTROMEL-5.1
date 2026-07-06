@@ -79,14 +79,12 @@ export async function renderNotifCard() {
   if (!cont) return;
   if (!esNativo()) {
     cont.innerHTML = `
-      <div class="card-title">🔔 Recordatorios de turnos</div>
       <div class="dim txt-xs">Disponible en la app instalada (APK): te avisa los turnos del día aunque la app esté cerrada.</div>`;
     return;
   }
   const db = store.get('db');
   const on = (await getCfg(db, 'notif_turnos_on', '1')) === '1';
   cont.innerHTML = `
-    <div class="card-title">🔔 Recordatorios de turnos</div>
     <label class="row center txt-sm" style="gap:8px;margin:6px 0;cursor:pointer;">
       <input type="checkbox" id="notif-turnos-chk" ${on ? 'checked' : ''}> Avisarme los turnos (1 h antes, o a las 8:00 si no tienen hora)
     </label>

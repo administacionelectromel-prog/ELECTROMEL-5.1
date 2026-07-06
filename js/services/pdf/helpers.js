@@ -282,11 +282,33 @@ export function pdfLineaCampo(doc, y, label, value, x) {
   return y + 5;
 }
 
+/* Dos campos en el mismo renglón (col. izquierda y col. derecha).
+   Si algún valor es muy largo y no entra, cae a una línea por campo. */
+export function pdfLineaCampoDoble(doc, y, labelA, valueA, labelB, valueB) {
+  const { W, margin } = PDF_A4;
+  const colB   = margin + (W - 2 * margin) / 2 + 4; /* mitad de la página */
+  const anchoA = colB - margin - 4;
+  doc.setFontSize(9);
+
+  const wA = doc.getTextWidth(pdfSanitize(labelA + ': ')) + doc.getTextWidth(pdfSanitize(String(valueA || '—')));
+  const wB = doc.getTextWidth(pdfSanitize(labelB + ': ')) + doc.getTextWidth(pdfSanitize(String(valueB || '—')));
+
+  /* Si la columna izquierda se pasa de su ancho, usar líneas separadas */
+  if (wA > anchoA || (colB + wB) > (W - margin)) {
+    let yy = pdfLineaCampo(doc, y, labelA, valueA);
+    return pdfLineaCampo(doc, yy, labelB, valueB);
+  }
+
+  pdfLineaCampo(doc, y, labelA, valueA, margin);
+  pdfLineaCampo(doc, y, labelB, valueB, colB);
+  return y + 5;
+}
+
 /* ═══════════════════════════════════════════════════════════
    DATOS DE PAGO (banco / alias / CBU)
    ═══════════════════════════════════════════════════════════ */
 export function pdfDatosPago(doc, y, cfg) {
-  if (!cfg.banco && !cfg.alias && !cfg.cbu) return y;
+  if (!cfg.banco && !cfg.alias && !cfg.cbu && !cfg.titular) return y;
   const { W, margin, texto } = PDF_A4;
 
   doc.setTextColor(...texto);
@@ -296,6 +318,7 @@ export function pdfDatosPago(doc, y, cfg) {
 
   doc.setFont('helvetica', 'normal');
   const parts = [];
+  if (cfg.titular) parts.push('Titular: ' + cfg.titular);
   if (cfg.banco) parts.push('Banco ' + cfg.banco);
   if (cfg.alias) parts.push('Alias: ' + cfg.alias);
   if (cfg.cbu)   parts.push('CBU: '   + cfg.cbu);

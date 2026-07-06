@@ -11,7 +11,7 @@
  *   - Soporte mensaje CLEAR_CACHE
  */
 
-const CACHE_VERSION = 'electromel-v2-0f';
+const CACHE_VERSION = 'electromel-v2-0n';
 const CDN_CACHE     = 'electromel-cdn-v1';
 
 const SHELL_ASSETS = [

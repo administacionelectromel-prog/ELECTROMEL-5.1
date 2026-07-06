@@ -14,7 +14,7 @@ import { pesos, pdfSanitize, fmtFechaCorta } from '../../core/utils.js';
 import { PDF_A4, getJsPDF, cargarDatosEmpresa } from './base.js';
 import {
   pdfHeaderA4, pdfPieA4, pdfCheckSpace,
-  pdfSectionBanner, pdfDatosCliente, pdfLineaCampo,
+  pdfSectionBanner, pdfDatosCliente, pdfLineaCampo, pdfLineaCampoDoble,
   pdfMontoBox, pdfBloqueFirmas, pdfTablaItems, pdfDatosPago
 } from './helpers.js';
 
@@ -51,11 +51,14 @@ export async function imprimirOTE_A4(numero) {
     /* Servicio */
     y = pdfSectionBanner(doc, y, 'DATOS DEL SERVICIO');
     doc.setFontSize(9); doc.setTextColor(...PDF_A4.texto);
-    y = pdfLineaCampo(doc, y, 'Tipo', ote.tipo_servicio || '—');
     const _equipoOTE = [ote.equipo_marca, ote.equipo_modelo].filter(Boolean).join(' ');
-    if (_equipoOTE)        y = pdfLineaCampo(doc, y, 'Equipo', _equipoOTE);
-    if (ote.falla)         y = pdfLineaCampo(doc, y, 'Falla', ote.falla);
-    if (ote.codigo_error)  y = pdfLineaCampo(doc, y, 'Cód. error', ote.codigo_error);
+    y = pdfLineaCampoDoble(doc, y,
+      'Tipo', ote.tipo_servicio || '—',
+      'Equipo', _equipoOTE || '—');
+    if (ote.falla || ote.codigo_error)
+      y = pdfLineaCampoDoble(doc, y,
+        'Falla', ote.falla || '—',
+        'Cód. error', ote.codigo_error || '—');
     if (ote.fecha) y = pdfLineaCampo(doc, y, 'Fecha', fmtFechaCorta(ote.fecha));
     y += 2;
 
@@ -159,8 +162,9 @@ export async function imprimirPRE_A4(numero) {
     /* Servicio */
     y = pdfSectionBanner(doc, y, 'SERVICIO SOLICITADO');
     doc.setFontSize(9); doc.setTextColor(...PDF_A4.texto);
-    y = pdfLineaCampo(doc, y, 'Tipo', pre.tipo_servicio || '—');
-    if (pre.equipo_modelo) y = pdfLineaCampo(doc, y, 'Equipo', pre.equipo_modelo);
+    y = pdfLineaCampoDoble(doc, y,
+      'Tipo', pre.tipo_servicio || '—',
+      'Equipo', pre.equipo_modelo || '—');
     y += 2;
 
     /* Descripción */

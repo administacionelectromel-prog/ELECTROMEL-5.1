@@ -126,6 +126,7 @@ export const CFG_FIELDS = {
   'cfg-empresa-cp':         { key: 'empresa_cp' },
   'cfg-empresa-tel':        { key: 'empresa_tel' },
   'cfg-empresa-email':      { key: 'empresa_email' },
+  'cfg-banco-titular':      { key: 'banco_titular' },
   'cfg-banco-nombre':       { key: 'banco_nombre' },
   'cfg-banco-alias':        { key: 'banco_alias' },
   'cfg-banco-cbu':          { key: 'banco_cbu' },

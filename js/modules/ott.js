@@ -364,23 +364,43 @@ function _abrirConfirmacionOTT(numero, data) {
   const body = document.getElementById('modal-ott-ok-body');
   if (body) {
     const equipoTxt = [data.equipo_tipo, data.equipo_marca, data.equipo_modelo].filter(Boolean).join(' · ');
+    const total    = parseFloat(data.total) || 0;
+    const adelanto = parseFloat(data.adelanto) || 0;
+    const saldo    = Math.max(0, total - adelanto);
+    const fmt = n => '$' + (n || 0).toLocaleString('es-AR');
+    const filaSaldo = adelanto > 0
+      ? `<div class="row-sb" style="padding:4px 0;"><span class="dim">Adelanto${data.adelanto_pct ? ' (' + data.adelanto_pct + '%)' : ''}</span><span>${fmt(adelanto)}</span></div>
+         <div class="row-sb" style="padding:4px 0;"><span class="dim">Saldo</span><span class="mono"><b>${fmt(saldo)}</b></span></div>`
+      : '';
     body.innerHTML = `
       <div class="card">
         <div class="row-sb" style="padding:4px 0;"><span class="dim">Número</span><span class="mono"><b>${numero}</b></span></div>
         <div class="row-sb" style="padding:4px 0;"><span class="dim">Cliente</span><span>${(data.cliente_nombre || '')}</span></div>
-        <div class="row-sb" style="padding:4px 0;"><span class="dim">Equipo</span><span>${equipoTxt}</span></div>
+        <div class="row-sb" style="padding:4px 0;"><span class="dim">Equipo</span><span style="text-align:right;">${equipoTxt}</span></div>
+        ${total > 0 ? `<div class="row-sb" style="padding:4px 0;border-top:1px solid var(--borde);margin-top:4px;"><span class="dim">Total</span><span class="mono"><b>${fmt(total)}</b></span></div>` : ''}
+        ${filaSaldo}
+        ${data.garantia ? `<div class="row-sb" style="padding:4px 0;"><span class="dim">Garantía</span><span>${data.garantia} días</span></div>` : ''}
       </div>`;
   }
 
   const footer = document.querySelector('#modal-ott-ok .modal-footer');
   if (footer) { footer.classList.add('modal-footer-stack'); footer.innerHTML = `
     <button class="btn btn-block mb-4" type="button" onclick="imprimirOTT_A4('${numero}')">🖨️ PDF A4</button>
+    <button class="btn btn-success btn-block mb-4" type="button" onclick="whatsappOTTGuardada('${numero}')">💬 Enviar WhatsApp</button>
     <button class="btn btn-success btn-block mb-4" type="button" onclick="abrirPagoParcial('${numero}')">💵 Registrar pago</button>
     <button class="btn btn-ghost btn-block mb-4" type="button" onclick="_programarMantDesde('OTT','${numero}')">🔧 Programar mantenimiento</button>
     <button class="btn btn-ghost btn-block mb-4" type="button" onclick="abrirGaleriaFotos('${numero}')">📷 Fotos del trabajo</button>
     <button class="btn btn-ghost btn-block" type="button" onclick="document.getElementById('modal-ott-ok').classList.remove('active')">Cerrar</button>`; }
-  /* Guardar datos para el preset de mantenimiento */
+  /* Datos para WhatsApp y preset de mantenimiento */
   try {
+    window.__ottGuardada = {
+      numero,
+      cliente_nombre:   data.cliente_nombre || '',
+      cliente_telefono: data.cliente_telefono || '',
+      equipo:           [data.equipo_tipo, data.equipo_marca, data.equipo_modelo].filter(Boolean).join(' '),
+      total:            parseFloat(data.total) || 0,
+      adelanto:         parseFloat(data.adelanto) || 0
+    };
     window.__ultimoEquipo = {
       origen: numero,
       cliente_nombre: data.cliente_nombre || '',
@@ -391,6 +411,22 @@ function _abrirConfirmacionOTT(numero, data) {
   } catch(e) {}
   openModal('modal-ott-ok');
 }
+
+/* WhatsApp desde la confirmación de OTT recién guardada */
+window.whatsappOTTGuardada = async (numero) => {
+  const g = window.__ottGuardada || {};
+  const fmt = n => '$' + (n || 0).toLocaleString('es-AR');
+  const saldo = Math.max(0, (g.total || 0) - (g.adelanto || 0));
+  let msg = `Hola ${g.cliente_nombre || ''}! Te paso el detalle de tu orden ${numero} en ELECTROMEL.`;
+  if (g.equipo)      msg += `\n\nEquipo: ${g.equipo}`;
+  if (g.total > 0)   msg += `\nTotal: ${fmt(g.total)}`;
+  if (g.adelanto > 0) msg += `\nAdelanto: ${fmt(g.adelanto)} · Saldo: ${fmt(saldo)}`;
+  msg += `\n\n¡Gracias por confiar en nosotros!`;
+  try {
+    const { openWhatsApp } = await import('../services/whatsapp.js');
+    openWhatsApp(g.cliente_telefono, msg);
+  } catch(e) { console.warn('[whatsappOTTGuardada]', e); showToast('No se pudo abrir WhatsApp', 'error'); }
+};
 
 /* ── crearOTTdesdeING ────────────────────────────────── */
 export async function crearOTTdesdeING(numIng) {
@@ -428,7 +464,9 @@ export async function crearOTTdesdeING(numIng) {
       if (ing.encomienda_costo) set('ott-ent-costo', pesos(ing.encomienda_costo));
       el('ott-entrada-fields')?.classList.remove('hide');
     }
-    if (ing.fecha) set('ott-fecha', ing.fecha);
+    /* La fecha de la orden es la de HOY (cuando se crea la OTT), no la
+       del ingreso: el ingreso pudo entrar días antes. Ya viene seteada
+       a hoy por el reset; no se pisa con ing.fecha. */
     if (ing.base)  set('ott-base',  ing.base);
   });
 }

@@ -147,7 +147,8 @@ export async function abrirFormularioOTE(preset = null) {
     set('ote-falla',            preset.falla);
     set('ote-error',            preset.codigo_error);
     set('ote-desc-servicio',    preset.desc_servicio);
-    if (preset.fecha) set('ote-fecha', preset.fecha);
+    /* La fecha de la OTE es la de HOY (cuando se crea la orden), no la
+       del presupuesto/turno de origen, que pudo ser días antes. */
     if (preset.base === 'SMA' || preset.base === 'NQN') set('ote-base', preset.base);
     /* Turno de agenda de origen → para marcarlo realizado al guardar */
     store.set('ote.turnoOrigenId', preset._turnoOrigenId || null);
@@ -361,11 +362,19 @@ function _abrirConfirmacionOTE(numero, data) {
         <div class="row-sb"><span class="dim txt-sm">Total</span><span class="bold">${pesos(data.total)}</span></div>
       </div>
       <button class="btn btn-ghost btn-block btn-sm" type="button" onclick="imprimirOTE_A4('${escapeHtml(numero)}')">🖨️ PDF A4</button>
+      <button class="btn btn-success btn-block btn-sm" type="button" onclick="whatsappOTEGuardada('${escapeHtml(numero)}')">💬 Enviar WhatsApp</button>
       <button class="btn btn-ghost btn-block btn-sm" type="button" onclick="_programarMantDesde('OTE','${escapeHtml(numero)}')">🔧 Programar mantenimiento</button>
       <button class="btn btn-ghost btn-block btn-sm" type="button" onclick="abrirGaleriaFotos('${escapeHtml(numero)}')">📷 Fotos del trabajo</button>`;
   }
-  /* Guardar datos para el preset de mantenimiento */
+  /* Datos para WhatsApp y preset de mantenimiento */
   try {
+    window.__oteGuardada = {
+      numero,
+      cliente_nombre:   data.cliente_nombre || '',
+      cliente_telefono: data.cliente_telefono || '',
+      servicio:         data.tipo_servicio || '',
+      total:            parseFloat(data.total) || 0
+    };
     window.__ultimoEquipo = {
       origen: numero,
       cliente_nombre: data.cliente_nombre || '',
@@ -376,6 +385,19 @@ function _abrirConfirmacionOTE(numero, data) {
   } catch(e) {}
   ok.classList.add('active');
 }
+
+/* WhatsApp desde la confirmación de OTE recién guardada */
+window.whatsappOTEGuardada = async (numero) => {
+  const g = window.__oteGuardada || {};
+  let msg = `Hola ${g.cliente_nombre || ''}! Te paso el detalle de tu orden ${numero} en ELECTROMEL.`;
+  if (g.servicio)  msg += `\n\nServicio: ${g.servicio}`;
+  if (g.total > 0) msg += `\nTotal: $${(g.total).toLocaleString('es-AR')}`;
+  msg += `\n\n¡Gracias por confiar en nosotros!`;
+  try {
+    const { openWhatsApp } = await import('../services/whatsapp.js');
+    openWhatsApp(g.cliente_telefono, msg);
+  } catch(e) { console.warn('[whatsappOTEGuardada]', e); showToast('No se pudo abrir WhatsApp', 'error'); }
+};
 
 /* ── crearOTEdesdePRE ────────────────────────────────────── */
 export async function crearOTEdesdePRE(numPRE) {

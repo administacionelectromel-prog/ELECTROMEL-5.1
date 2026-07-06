@@ -51,7 +51,7 @@ export async function cargarDatosEmpresa() {
     'empresa_nombre','empresa_sub','empresa_cuit','empresa_iibb','empresa_iva',
     'empresa_domicilio','empresa_ciudad','empresa_provincia','empresa_tel','empresa_email',
     'tecnico_nombre','tecnico_titulo',
-    'banco_nombre','banco_alias','banco_cbu',
+    'banco_titular','banco_nombre','banco_alias','banco_cbu',
     'leyenda_legal','condiciones_servicio','empresa_logo'
   ];
   const out = {};
@@ -60,6 +60,7 @@ export async function cargarDatosEmpresa() {
     out[k] = v ? String(v) : '';
   }));
   /* Aliases cortos para compatibilidad con código existente */
+  out.titular = out.banco_titular;
   out.banco = out.banco_nombre;
   out.alias = out.banco_alias;
   out.cbu   = out.banco_cbu;

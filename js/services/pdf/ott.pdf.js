@@ -11,7 +11,7 @@ import { pesos, pdfSanitize, fmtFechaCorta } from '../../core/utils.js';
 import { PDF_A4, getJsPDF, cargarDatosEmpresa } from './base.js';
 import {
   pdfHeaderA4, pdfPieA4, pdfCheckSpace,
-  pdfSectionBanner, pdfDatosCliente, pdfLineaCampo,
+  pdfSectionBanner, pdfDatosCliente, pdfLineaCampo, pdfLineaCampoDoble,
   pdfMontoBox, pdfBloqueFirmas, pdfTablaItems, pdfGarantiaBanda, pdfDatosPago
 } from './helpers.js';
 
@@ -92,10 +92,12 @@ export async function imprimirOTT_A4(numero) {
     /* Datos del equipo */
     y = pdfSectionBanner(doc, y, 'DATOS DEL EQUIPO');
     doc.setFontSize(9);
-    y = pdfLineaCampo(doc, y, 'Equipo',       orden.equipo_tipo || '—');
-    y = pdfLineaCampo(doc, y, 'Marca/Modelo', [orden.equipo_marca, orden.equipo_modelo].filter(Boolean).join(' ') || '—');
-    y = pdfLineaCampo(doc, y, 'Falla declarada', orden.equipo_falla  || '—');
-    y = pdfLineaCampo(doc, y, 'Error declarado',  orden.equipo_error || 'Sin código');
+    y = pdfLineaCampoDoble(doc, y,
+      'Equipo', orden.equipo_tipo || '—',
+      'Marca/Modelo', [orden.equipo_marca, orden.equipo_modelo].filter(Boolean).join(' ') || '—');
+    y = pdfLineaCampoDoble(doc, y,
+      'Falla declarada', orden.equipo_falla || '—',
+      'Error declarado', orden.equipo_error || 'Sin código');
     y += 2;
 
     /* Encomienda entrada */
