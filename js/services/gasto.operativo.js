@@ -769,15 +769,26 @@ export async function listarTrabajosParaAsociar(viaje) {
       /* ING ya convertido en OTT/OTE → no mostrar (archivado) */
       if (tipo === 'ING' && (t.archivado || t.convertido_a_ott || t.convertido_a_ote || (t.estado || '').includes('archivado'))) continue;
 
+      /* PRE ya convertido en OTT/OTE → NO mostrar: prevalece la orden.
+         (Si no, se contaría dos veces la misma plata: el PRE y su OTE.) */
+      if (tipo === 'PRE' && (t.convertido_a_ott || t.convertido_a_ote || t.archivado)) continue;
+
+      /* PRE rechazado → NO cuenta: es plata que no se va a cobrar. */
+      const estadoPre = (t.estado || '').toLowerCase();
+      if (tipo === 'PRE' && (estadoPre.includes('rechaz') || estadoPre.includes('cancel') || estadoPre.includes('perdid'))) continue;
+
       /* Trabajos entregados/pagados/archivados → no ofrecer para asociar
          (son trabajos cerrados, ya no son parte de la planificación del viaje) */
       const est = (t.estado || '').toLowerCase();
-      if (est.includes('entregado') || est.includes('pagado') || est.includes('archivado') || est.includes('cancel')) continue;
+      if (est.includes('entregado') || est.includes('pagado') || est.includes('archivado') || est.includes('cancel') || t.archivado || t.cerrado) continue;
 
       const numero = t.numero || t.id;
       const idStr = String(numero);
       const ciu = (t.cliente_ciudad || t.zona || '').toLowerCase().trim();
-      const autoDetectado = ciu === ciudadNorm && ciudadNorm !== '';
+      /* Auto-detección por ciudad. Excepción: un PRE (presupuesto sin
+         aprobar) NO se auto-asocia — es plata no confirmada. Aparece en
+         la lista para tildarlo a mano si el trabajo se concreta. */
+      const autoDetectado = ciu === ciudadNorm && ciudadNorm !== '' && tipo !== 'PRE';
       const incluido = incluidos.includes(idStr) || (autoDetectado && !excluidos.includes(idStr));
       resultado.push({
         tipo, numero, idStr,
