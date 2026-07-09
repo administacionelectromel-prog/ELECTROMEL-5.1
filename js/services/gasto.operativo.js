@@ -568,6 +568,19 @@ export async function analizarViaje(viaje) {
            (ya está representado por su orden, evita duplicar el mismo equipo). */
         if (tipo === 'ING' && (t.archivado || t.convertido_a_ott || t.convertido_a_ote || (t.estado || '').includes('archivado'))) continue;
 
+        /* PRE ya convertido en orden → no contar: prevalece la OTT/OTE
+           (si no, se suma dos veces la misma plata). */
+        if (tipo === 'PRE' && (t.convertido_a_ott || t.convertido_a_ote || t.archivado)) continue;
+
+        /* PRE rechazado/perdido → no es plata que se vaya a cobrar. */
+        const estadoPre = (t.estado || '').toLowerCase();
+        if (tipo === 'PRE' && (estadoPre.includes('rechaz') || estadoPre.includes('cancel') || estadoPre.includes('perdid'))) continue;
+
+        /* Trabajos cerrados (entregados/pagados/archivados/cancelados) de
+           viajes anteriores → no cuentan en la facturación de este viaje. */
+        const estT = (t.estado || '').toLowerCase();
+        if (estT.includes('entregado') || estT.includes('pagado') || estT.includes('archivado') || estT.includes('cancel') || t.archivado || t.cerrado) continue;
+
         const numero = t.numero || t.id;
         const idStr = String(numero);
 
@@ -577,14 +590,10 @@ export async function analizarViaje(viaje) {
         /* Incluido a mano → entra siempre */
         const estaIncluidoManual = incluidosManual.includes(idStr);
 
-        /* Detección automática por ciudad + rango de fechas */
+        /* Detección automática por ciudad. Los PRE (sin aprobar) NO se
+           auto-detectan: son plata no confirmada, se agregan a mano. */
         const ciu = (t.cliente_ciudad || t.zona || '').toLowerCase().trim();
-        const f = (t.fecha || t.creado_at || t.fecha_creacion || '').slice(0, 10);
-        /* Detección automática SOLO por ciudad (sin filtro de fecha): los
-           trabajos previos —creados antes de la salida— también cuentan,
-           porque son los que ya tenías de antes en esa zona. Mismo criterio
-           que "Gestionar trabajos", para que ambas pantallas coincidan. */
-        const autoDetectado = ciu === ciudadNorm && ciudadNorm !== '';
+        const autoDetectado = ciu === ciudadNorm && ciudadNorm !== '' && tipo !== 'PRE';
 
         if (estaIncluidoManual || autoDetectado) {
           trabajos.push({ ...t, _tipo: tipo, _numero: numero, _idStr: idStr, _manual: estaIncluidoManual });
