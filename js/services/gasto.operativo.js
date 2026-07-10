@@ -553,6 +553,20 @@ export async function analizarViaje(viaje) {
   let trabajos = [];
   try {
     const ciudadNorm = (gasto.ciudad_nombre || '').toLowerCase().trim();
+    /* Rango de fechas del viaje (para asociar solo trabajos de esas fechas).
+       Un trabajo pertenece al viaje si su fecha cae dentro del rango. Esto
+       evita que un viaje se trague trabajos de otros viajes de la misma
+       ciudad. Si el viaje no tiene fechas cargadas, no se filtra por fecha
+       (se mantiene el criterio por ciudad, para no perder nada). */
+    const vDesde = (viaje.fecha_salida  || '').slice(0, 10);
+    const vHasta = (viaje.fecha_regreso || '').slice(0, 10);
+    const hayRango = vDesde && vHasta;
+    const enRango = (fechaTrabajo) => {
+      if (!hayRango) return true;              // sin rango → no filtra por fecha
+      const f = (fechaTrabajo || '').slice(0, 10);
+      if (!f) return true;                     // trabajo sin fecha → no se excluye
+      return f >= vDesde && f <= vHasta;
+    };
     const stores = [
       { store: 'ingresos',     tipo: 'ING' },
       { store: 'ordenes',      tipo: 'OTT' },
@@ -576,24 +590,24 @@ export async function analizarViaje(viaje) {
         const estadoPre = (t.estado || '').toLowerCase();
         if (tipo === 'PRE' && (estadoPre.includes('rechaz') || estadoPre.includes('cancel') || estadoPre.includes('perdid'))) continue;
 
-        /* Trabajos cerrados (entregados/pagados/archivados/cancelados) de
-           viajes anteriores → no cuentan en la facturación de este viaje. */
-        const estT = (t.estado || '').toLowerCase();
-        if (estT.includes('entregado') || estT.includes('pagado') || estT.includes('archivado') || estT.includes('cancel') || t.archivado || t.cerrado) continue;
-
         const numero = t.numero || t.id;
         const idStr = String(numero);
 
         /* Excluido a mano → fuera siempre */
         if (excluidosManual.includes(idStr)) continue;
 
-        /* Incluido a mano → entra siempre */
+        /* Incluido a mano → entra siempre (respeta tu decisión, aunque
+           esté fuera del rango de fechas del viaje). */
         const estaIncluidoManual = incluidosManual.includes(idStr);
 
-        /* Detección automática por ciudad. Los PRE (sin aprobar) NO se
-           auto-detectan: son plata no confirmada, se agregan a mano. */
+        /* Detección automática por CIUDAD + FECHA dentro del rango del viaje.
+           - La fecha es lo que define pertenencia: un trabajo entregado o
+             cerrado de ESTE viaje SÍ cuenta (está en el rango); un trabajo
+             de otro viaje de la misma ciudad NO (queda fuera del rango).
+           - Los PRE (sin aprobar) no se auto-detectan: plata no confirmada. */
         const ciu = (t.cliente_ciudad || t.zona || '').toLowerCase().trim();
-        const autoDetectado = ciu === ciudadNorm && ciudadNorm !== '' && tipo !== 'PRE';
+        const fechaTrab = t.fecha || t.creado_at || t.fecha_creacion || '';
+        const autoDetectado = ciu === ciudadNorm && ciudadNorm !== '' && tipo !== 'PRE' && enRango(fechaTrab);
 
         if (estaIncluidoManual || autoDetectado) {
           trabajos.push({ ...t, _tipo: tipo, _numero: numero, _idStr: idStr, _manual: estaIncluidoManual });
@@ -763,6 +777,19 @@ export async function listarTrabajosParaAsociar(viaje) {
   const ciudad = await getCiudad(viaje.ciudad_id);
   const ciudadNorm = (ciudad ? ciudad.nombre : viaje.ciudad || '').toLowerCase().trim();
 
+  /* Rango de fechas del viaje: un trabajo pertenece al viaje si su fecha
+     cae dentro. Evita que un viaje muestre trabajos de otros viajes de la
+     misma ciudad. Sin fechas cargadas → no filtra por fecha (no pierde nada). */
+  const vDesde = (viaje.fecha_salida  || '').slice(0, 10);
+  const vHasta = (viaje.fecha_regreso || '').slice(0, 10);
+  const hayRango = vDesde && vHasta;
+  const enRango = (fechaTrabajo) => {
+    if (!hayRango) return true;
+    const f = (fechaTrabajo || '').slice(0, 10);
+    if (!f) return true;
+    return f >= vDesde && f <= vHasta;
+  };
+
   const stores = [
     { store: 'ingresos',     tipo: 'ING' },
     { store: 'ordenes',      tipo: 'OTT' },
@@ -786,18 +813,16 @@ export async function listarTrabajosParaAsociar(viaje) {
       const estadoPre = (t.estado || '').toLowerCase();
       if (tipo === 'PRE' && (estadoPre.includes('rechaz') || estadoPre.includes('cancel') || estadoPre.includes('perdid'))) continue;
 
-      /* Trabajos entregados/pagados/archivados → no ofrecer para asociar
-         (son trabajos cerrados, ya no son parte de la planificación del viaje) */
-      const est = (t.estado || '').toLowerCase();
-      if (est.includes('entregado') || est.includes('pagado') || est.includes('archivado') || est.includes('cancel') || t.archivado || t.cerrado) continue;
-
       const numero = t.numero || t.id;
       const idStr = String(numero);
       const ciu = (t.cliente_ciudad || t.zona || '').toLowerCase().trim();
-      /* Auto-detección por ciudad. Excepción: un PRE (presupuesto sin
-         aprobar) NO se auto-asocia — es plata no confirmada. Aparece en
-         la lista para tildarlo a mano si el trabajo se concreta. */
-      const autoDetectado = ciu === ciudadNorm && ciudadNorm !== '' && tipo !== 'PRE';
+      const fechaTrab = t.fecha || t.creado_at || t.fecha_creacion || '';
+      /* Auto-detección por CIUDAD + FECHA dentro del rango del viaje.
+         La fecha define pertenencia: un trabajo cerrado de ESTE viaje sí
+         aparece (está en el rango); uno de otro viaje de la misma ciudad no.
+         Un PRE (sin aprobar) no se auto-asocia, pero sí aparece en la lista
+         para tildarlo a mano si el trabajo se concreta. */
+      const autoDetectado = ciu === ciudadNorm && ciudadNorm !== '' && tipo !== 'PRE' && enRango(fechaTrab);
       const incluido = incluidos.includes(idStr) || (autoDetectado && !excluidos.includes(idStr));
       resultado.push({
         tipo, numero, idStr,
